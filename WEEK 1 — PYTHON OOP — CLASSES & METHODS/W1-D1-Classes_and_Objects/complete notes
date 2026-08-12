@@ -1,0 +1,167 @@
+**W1-D1-Classes_and_Objects**
+
+---
+
+**What and Why:**
+Class = blueprint. Object = real thing built from it. Every Django model, view, serializer is a class. This is the foundation — everything in your two projects uses this pattern.
+
+---
+
+```python
+# ============================================================
+# CONCEPT 1: CLASS AND OBJECT
+# ============================================================
+
+class Car:  # 'class' keyword creates a blueprint called Car
+            # Car is not a real car yet — just the design
+
+    def __init__(self, brand, model, year):
+        # __init__ = special method called constructor
+        # runs AUTOMATICALLY the moment you create an object
+        # you never call __init__ yourself — Python calls it for you
+        # self = this specific object being created right now
+        # brand, model, year = values you pass in when creating object
+
+        self.brand = brand
+        # self.brand = creating an attribute called 'brand' ON this object
+        # = brand means: take the value passed in and store it permanently
+        # WITHOUT this line: value 'brand' exists only inside __init__
+        # and disappears the moment __init__ finishes — permanently lost
+
+        self.model = model  # same — permanently save model on this object
+        self.year = year    # same — permanently save year on this object
+
+    def display_info(self):
+        # method = function that belongs to this class
+        # self = this specific object calling the method
+        # self gives access to this object's own saved data
+        print(f"{self.year} {self.brand} {self.model}")
+        # uses self.year, self.brand, self.model saved in __init__
+
+    def is_new(self):
+        return self.year >= 2023
+        # return = sends value back to whoever called this method
+        # >= 2023 = True if year is 2023 or above, False if not
+        # return is NOT print — return gives value back, print just shows it
+
+
+# ============================================================
+# CREATING OBJECTS
+# ============================================================
+
+car1 = Car("Toyota", "Corolla", 2022)
+# Car("Toyota", "Corolla", 2022) = create new object from Car blueprint
+# Python automatically calls __init__ with these values
+# self = car1, brand = "Toyota", model = "Corolla", year = 2022
+# car1 now permanently holds: brand=Toyota, model=Corolla, year=2022
+
+car2 = Car("Honda", "Civic", 2023)
+# completely separate object from car1
+# car2 holds its own data — changing car1 NEVER affects car2
+
+car1.display_info()   # 2022 Toyota Corolla
+car2.display_info()   # 2023 Honda Civic
+# same method, different objects, different output
+# self becomes car1 when car1 calls it
+# self becomes car2 when car2 calls it
+
+print(car1.is_new())  # False — 2022 is not >= 2023
+print(car2.is_new())  # True — 2023 is >= 2023
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 2: PERSON CLASS — PRACTICE SAME PATTERN
+# ============================================================
+
+class Person:
+    def __init__(self, name, age, city):
+        self.name = name   # save name permanently on this object
+        self.age = age     # save age permanently on this object
+        self.city = city   # save city permanently on this object
+
+    def introduce(self):
+        # f-string uses this object's own saved data
+        print(f"Hi I'm {self.name}, {self.age}, from {self.city}")
+
+    def is_adult(self):
+        return self.age >= 18
+        # True if age 18 or above
+        # False if below 18
+
+
+p1 = Person("Ravi", 22, "Hyderabad")
+p2 = Person("Sai", 16, "Bangalore")
+
+p1.introduce()        # Hi I'm Ravi, 22, from Hyderabad
+print(p1.is_adult())  # True
+p2.introduce()        # Hi I'm Sai, 16, from Bangalore
+print(p2.is_adult())  # False
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 3: ANIMAL CLASS
+# ============================================================
+
+class Animal:
+    def __init__(self, name, species):
+        self.name = name
+        self.species = species
+
+    def make_sound(self):
+        print("Some generic animal sound")
+        # all animals print same sound today
+        # Week 2 Inheritance — each animal gets its own sound
+        # Dog says Woof, Cat says Meow etc — don't worry about it now
+
+
+a1 = Animal("Rex", "Dog")
+a2 = Animal("Milo", "Cat")
+a3 = Animal("Kiwi", "Bird")
+
+a1.make_sound()  # Some generic animal sound
+a2.make_sound()  # Some generic animal sound
+a3.make_sound()  # Some generic animal sound
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — HOW THIS LOOKS IN REAL PROJECT
+# ============================================================
+
+# In your AI Job Portal project (Week 7), you will write:
+
+class Job(models.Model):        # Job = class (blueprint for job table)
+    title = models.CharField()  # self.title = attribute on each job object
+    company = models.CharField()
+    salary = models.IntegerField()
+
+    def is_high_paying(self):   # method on job object — same as is_new() on Car
+        return self.salary >= 100000
+
+# Every job posted in your app = one Job object
+# Same exact pattern as Car/Person/Animal — just connected to database
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Create a `Laptop` class — attributes: `brand`, `ram`, `price`. Method `is_affordable()` → True if price < 50000. Create 2 Laptop objects, test `is_affordable()` on both.
+
+**Q2:** Create a `Student` class — attributes: `name`, `age`, `grade`. Method `is_pass()` → True if grade >= 40. Method `introduce()` → prints "Hi I'm {name}, grade: {grade}". Create 3 students, test both methods on each.
+
+**Q3:** Create a `Bank` class — attributes: `bank_name`, `location`. Method `info()` → prints "{bank_name} is located in {location}". Create 2 bank objects, call `info()` on both.
+
+---
+
+Say "Revision Notes W1 D1" for revision notes or "W1 D2" to continue.
