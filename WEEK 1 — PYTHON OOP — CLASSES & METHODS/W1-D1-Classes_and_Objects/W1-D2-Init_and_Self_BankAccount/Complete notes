@@ -1,0 +1,159 @@
+**W1-D2-Init_and_Self_BankAccount**
+
+---
+
+**What and Why:**
+Today you go deeper into `__init__` and `self` by building a BankAccount class. New concept: **state** — object data that changes over time. Yesterday Car/Person data never changed after creation. Today BankAccount balance changes every time you deposit or withdraw. This is exactly how Django model records work — data stored, updated, retrieved over time.
+
+---
+
+```python
+# ============================================================
+# CONCEPT 1: STATE — DATA THAT CHANGES OVER TIME
+# ============================================================
+
+class BankAccount:
+    def __init__(self, owner, balance):
+        # owner and balance saved permanently on this object
+        # balance is the STATE — it will change over time
+        # this is exactly how Django model fields work
+        self.owner = owner
+        self.balance = balance  # starting balance — will change later
+
+    def deposit(self, amount):
+        # amount = value passed in when calling deposit
+        # self = this specific account object
+
+        if amount <= 0:
+            # VALIDATION — never trust input blindly
+            # negative or zero deposit makes no sense
+            # always validate before changing state
+            print("Invalid amount")
+            return  # stop here, don't continue below
+
+        self.balance += amount
+        # self.balance += amount = self.balance = self.balance + amount
+        # reads current balance, adds amount, saves back on this object
+        # THIS is state changing — balance is now different from before
+        print(f"Deposited {amount}. New balance: {self.balance}")
+
+    def withdraw(self, amount):
+        if amount <= 0:
+            # block zero and negative withdrawals
+            print("Invalid amount")
+            return
+
+        if amount > self.balance:
+            # block overdraft — can't withdraw more than available
+            # real backend always checks this before changing data
+            print("Insufficient funds")
+            return
+
+        self.balance -= amount
+        # self.balance -= amount = self.balance = self.balance - amount
+        # subtract amount from current balance, save back on object
+        print(f"Withdrew {amount}. New balance: {self.balance}")
+
+    def show_balance(self):
+        # just reads and displays — doesn't change anything
+        print(f"{self.owner}'s balance: {self.balance}")
+
+    def transfer(self, other_account, amount):
+        # self = account sending money
+        # other_account = another BankAccount object receiving money
+        # one method working on TWO objects at once
+
+        if amount > self.balance:
+            print("Insufficient funds to transfer")
+            return
+
+        self.balance -= amount            # remove from sender
+        other_account.balance += amount   # add to receiver
+        # notice: directly accessing other_account's balance
+        # this is allowed because both are BankAccount objects
+        print(f"Transferred {amount} to {other_account.owner}")
+
+
+# ============================================================
+# CREATING OBJECTS AND TESTING
+# ============================================================
+
+acc1 = BankAccount("Ravi", 1000)  # acc1 starts with balance 1000
+acc2 = BankAccount("Sai", 500)    # acc2 starts with balance 500
+
+acc1.deposit(200)     # balance becomes 1200
+acc1.withdraw(300)    # balance becomes 900
+acc1.show_balance()   # Ravi's balance: 900
+
+acc2.withdraw(700)    # blocked — only has 500
+acc2.deposit(-50)     # blocked — invalid amount
+acc2.show_balance()   # Sai's balance: 500 — unchanged
+
+acc1.transfer(acc2, 100)  # sends 100 from acc1 to acc2
+acc1.show_balance()       # Ravi's balance: 800
+acc2.show_balance()       # Sai's balance: 600
+```
+
+---
+
+```python
+# ============================================================
+# COMMON MISTAKE — WHY self.balance NOT local variable
+# ============================================================
+
+def deposit_wrong(self, amount):
+    balance = self.balance + amount
+    # balance here is a LOCAL variable — exists only inside this method
+    # the moment method finishes, this value is GONE
+    # self.balance is never updated — object still has old balance
+    print(f"New balance: {balance}")  # shows correct value THIS time only
+    # next time you check self.balance — it's still the old value
+    # always use self.balance to update, never a local variable
+
+# CORRECT WAY:
+def deposit_correct(self, amount):
+    self.balance += amount  # updates permanently on the object
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — HOW THIS LOOKS IN REAL PROJECT
+# ============================================================
+
+# In your SaaS Expense Manager (Week 10), you will write:
+
+class Expense(models.Model):
+    amount = models.IntegerField()
+    status = models.CharField()  # "pending", "approved", "rejected"
+
+    def approve(self):
+        # same as withdraw() — changing state on the object
+        self.status = "approved"
+        self.save()  # Django's way of saving changed state to database
+
+    def reject(self):
+        self.status = "rejected"
+        self.save()
+
+# approve() and reject() = same pattern as deposit() and withdraw()
+# self.status changes = same as self.balance changing
+# self.save() = Django saves the changed state to database
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Create a `Wallet` class — attributes: `owner`, `balance`. Methods: `add_money(amount)`, `spend_money(amount)`, `show_balance()`. Add validation — block negative amounts and overspending. Create 2 wallet objects, test all methods.
+
+**Q2:** Create a `PhoneRecharge` class — attributes: `phone_number`, `balance`. Method `recharge(amount)` → adds to balance, blocks if amount <= 0. Method `make_call(minutes)` → deducts `minutes * 2` from balance, blocks if not enough balance. Method `show_balance()`. Create 1 object, test all methods.
+
+**Q3:** Add a `transfer(other_wallet, amount)` method to your Wallet class from Q1. Transfer 100 from wallet1 to wallet2, show balance of both after.
+
+---
+
+Say "Revision Notes W1 D2" for revision notes or "W1 D3" to continue.
