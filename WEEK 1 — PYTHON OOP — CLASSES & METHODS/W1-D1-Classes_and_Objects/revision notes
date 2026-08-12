@@ -1,0 +1,50 @@
+**W1-D1-Revision-Classes_and_Objects**
+
+---
+
+```
+KEY POINTS:
+- class = blueprint
+- object = real thing built from blueprint
+- __init__ = runs automatically when object created
+- self = this specific object
+- self.x = x = permanently store value on object
+- method = function inside class
+- return = sends value back (reusable)
+- print = just displays, value gone after
+- Django models/views/serializers = all classes
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+class Car:
+    def __init__(self, brand, model, year):
+        self.brand = brand
+        self.model = model
+        self.year = year
+
+    def display_info(self):
+        print(f"{self.year} {self.brand} {self.model}")
+
+    def is_new(self):
+        return self.year >= 2023
+
+car1 = Car("Toyota", "Corolla", 2022)
+car1.display_info()   # 2022 Toyota Corolla
+print(car1.is_new())  # False
+```
+
+---
+
+```
+DJANGO CONNECTION:
+class Job(models.Model) = same pattern
+self.title, self.salary = same as self.brand, self.year
+```
+
+---
+
+Say "W1 D2" when ready.
