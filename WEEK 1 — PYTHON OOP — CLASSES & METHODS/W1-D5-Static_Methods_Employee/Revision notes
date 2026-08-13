@@ -1,0 +1,75 @@
+**W1-D5-Revision-Static_Methods_Employee**
+
+---
+
+```
+KEY POINTS:
+- @staticmethod = no self, no cls — pure utility/helper function
+- use for: validation, calculations, formatting
+- doesn't need object data or class data
+- called on class directly: Employee.is_valid_salary(30000)
+- without @staticmethod = Python auto-passes object, crashes
+- isalpha() = True only if all characters are letters
+- three method types:
+  instance method = self — one object's data
+  classmethod = cls — class level data
+  staticmethod = nothing — independent utility
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+class Employee:
+    total_employees = 0
+    company_name = "TechCorp"
+
+    def __init__(self, name, salary):
+        self.name = name
+        self.salary = salary
+        Employee.total_employees += 1
+        if not Employee.is_valid_salary(salary):
+            print(f"Warning: {name} has invalid salary")
+
+    @classmethod
+    def get_total_employees(cls):
+        return cls.total_employees
+
+    @classmethod
+    def from_string(cls, data_string):
+        name, salary = data_string.split("-")
+        return cls(name, int(salary))
+
+    @staticmethod
+    def is_valid_salary(salary):
+        return salary > 0  # True if positive
+
+    @staticmethod
+    def calculate_bonus(salary, percentage):
+        return salary * (percentage / 100)
+
+    @staticmethod
+    def is_valid_name(name):
+        return name.isalpha() and len(name) > 0
+
+
+e1 = Employee("Ravi", 30000)
+e2 = Employee("Sai", -5000)             # warning printed
+print(Employee.is_valid_salary(30000))   # True
+print(Employee.calculate_bonus(30000, 10))  # 3000.0
+print(Employee.is_valid_name("Ravi123"))    # False
+print(Employee.get_total_employees())    # 2
+```
+
+---
+
+```
+DJANGO CONNECTION:
+@staticmethod is_valid_salary() = validate before saving to database
+called in view: if not Job.is_valid_salary(salary): return error response
+```
+
+---
+
+Say "W1 D6" when ready.
