@@ -1,0 +1,182 @@
+
+
+# 🐍 WEEK 1 — PYTHON OOP
+## CLASSES & METHODS
+
+| Day | What To Do |
+|---|---|
+| **Mon** | Classes & Objects — Write Car, Person, Animal classes. Run all 3. |
+| **Tue** | `__init__` and self — BankAccount class with deposit and withdraw methods. |
+| **Wed** | Instance Methods — Student class with pass/fail result method. |
+| **Thu** | Class Methods — Employee class with total count using `@classmethod`. |
+| **Fri** | Static Methods — Add `@staticmethod company_name` to Employee class. |
+| **Sat** | Practice Day — Rebuild BankAccount + Student + Employee from memory. **No looking back.** |
+| **Sun** | Mini Project — Library system with Book class, Library class, add/remove/search books. |
+
+> ### ✅ AFTER WEEK 1
+> Continue to Week 2.
+
+---
+
+# 🐍 WEEK 2 — PYTHON OOP
+## INHERITANCE & ERROR HANDLING
+
+| Day | What To Do |
+|---|---|
+| **Mon** | Inheritance — Animal (parent), Dog and Cat (children). Each child has own `sound()` method. |
+| **Tue** | Multiple Inheritance — Employee (parent), Manager and Developer (children) with extra attributes. |
+| **Wed** | Encapsulation — Private variables using `__`. Getter and setter methods. Why we hide data. |
+| **Thu** | Polymorphism — Same method name, different behaviour. Shape, Circle, Square example. |
+| **Fri** | Error Handling — `try/except`. Handle `ZeroDivisionError`, `ValueError`. `finally` block. |
+| **Sat** | Modules & Packages — Split code into files. Import own modules. Install packages with `pip`. |
+| **Sun** | Virtual Environment — Create `venv`, activate, install Django inside it. Understand why needed. |
+
+> ## 🚨 CHECKPOINT
+> **After Week 2 — Come to Claude. Say `OOP Done`.**
+>
+> I test you before moving to Django.
+
+---
+
+# 🌐 WEEK 3 — DJANGO BASICS
+## SETUP & MODELS
+
+| Day | What To Do |
+|---|---|
+| **Mon** | Django Setup — Install Django, create project, understand folder structure, run server, see welcome page. |
+| **Tue** | Apps & URLs — Create app, write first view returning Hello World, connect URL, open in browser. |
+| **Wed** | Models — Create Post model with title, content, date fields. Run migrations. Check database. |
+| **Thu** | Django ORM — Create, read, filter, update, delete records using ORM in Django shell. |
+| **Fri** | Admin Panel — Register model, create superuser, login to admin, add and edit records. |
+| **Sat** | PostgreSQL Setup — Install PostgreSQL, remove SQLite, connect Django, run migrations again. |
+| **Sun** | Relations — ForeignKey (User has many Posts). ManyToMany (Post has many Tags). Query both. |
+
+---
+
+# 🔌 WEEK 4 — DJANGO REST FRAMEWORK
+## APIs
+
+| Day | What To Do |
+|---|---|
+| **Mon** | DRF Setup — Install DRF, understand API vs webpage, create first endpoint returning JSON data. |
+| **Tue** | Serializers — Convert model data to JSON. Write ModelSerializer for Post model. Return list as JSON. |
+| **Wed** | APIView — Handle GET POST PUT DELETE in one class. Build full CRUD API for posts. |
+| **Thu** | Postman — Download Postman, test all endpoints GET POST PUT DELETE. Fix any issues. |
+| **Fri** | JWT Authentication — Install SimpleJWT, register and login endpoints, protect endpoints with token. |
+| **Sat** | Permissions — IsAuthenticated, custom permissions, only owner can edit own data. |
+| **Sun** | Search Filter Pagination — Search by title, filter by date, paginate 10 per page. Test all. |
+
+> ## 🚨 CHECKPOINT
+> **After Week 4 — Come to Claude. Say `API Done`.**
+>
+> I test you before moving to Production Skills.
+
+---
+
+# ⚙️ WEEK 5 — PRODUCTION SKILLS
+## GIT, CELERY, OPENAI
+
+| Day | What To Do |
+|---|---|
+| **Mon** | Git & GitHub — init, add, commit, push, branches. Create GitHub account. Push Notes API project. |
+| **Tue** | README & Environment Variables — Write proper README. Create `.env` file. Use `python-decouple`. |
+| **Wed** | Celery Setup — Install Celery and Redis. Connect to Django. Write first background task. |
+| **Thu** | Celery Tasks — Trigger task from view. Task sends email in background without stopping API. |
+| **Fri** | Celery Beat — Scheduled tasks. Daily report runs automatically at set time. |
+| **Sat** | OpenAI API — Get API key. Call OpenAI from Python. Send prompt, handle response in Django view. |
+| **Sun** | AI Integration — Build endpoint: user sends text, Django calls OpenAI, returns AI response. Test in Postman. |
+
+---
+
+# 🐳 WEEK 6 — DOCKER & DEPLOYMENT
+
+| Day | What To Do |
+|---|---|
+| **Mon** | Docker Basics — What is Docker, write Dockerfile for Django app, build image, run container. |
+| **Tue** | Docker Compose — Run Django + PostgreSQL + Redis together. One command starts everything. |
+| **Wed** | Deployment on Render — Deploy Notes API on Render free tier, connect PostgreSQL, set env vars. |
+| **Thu** | Fix & Test — Test every endpoint on live URL. Fix any deployment issues. Confirm working. |
+| **Fri** | GitHub Polish — Clean up code, proper README with live URL, endpoints list, setup instructions. |
+| **Sat** | Full Revision — Revise Git, Celery, OpenAI, Docker, Deployment all working together. |
+| **Sun** | Rest & Plan — Review what you built. Plan Project 1 architecture on paper. |
+
+> ## 🎯 BIG CHECKPOINT
+> **After Week 6 — You know all skills.**
+>
+> **Weeks 7–9 = Build Project 1**  
+> **Weeks 10–12 = Build Project 2**
+
+---
+
+# 🚀 WEEK 7–9 — PROJECT 1
+## AI JOB PORTAL
+
+### WEEK 7
+
+| Day | What To Do |
+|---|---|
+| **Mon** | Project setup. Plan all models on paper. Create Django project. Setup PostgreSQL. Custom User model. |
+| **Tue** | Auth APIs — Register and login for Admin, Company, Candidate. JWT working. Test in Postman. |
+| **Wed** | Job Posting APIs — Company creates/updates/deletes jobs. Candidate reads only. Permissions correct. |
+| **Thu** | Application APIs — Candidate applies with resume. Prevent duplicate applications. |
+| **Fri** | AI Resume Match — On apply, send resume + job to OpenAI, get score %, save to database. |
+| **Sat** | Search Filter Pagination — Search jobs by title, location, salary. Filter by type. Paginated. |
+| **Sun** | Email Notifications — Celery task: email company on new application, email candidate on status change. |
+
+### WEEK 8
+
+| Day | What To Do |
+|---|---|
+| **Week 8** | Testing & Bug Fixing — Test every single endpoint. Fix all issues. Clean up code. |
+
+### WEEK 9
+
+| Day | What To Do |
+|---|---|
+| **Sat** | Deploy — Push to GitHub with clean README and live URL. Deploy on Render. Confirm working. |
+| **Sun** | Project 1 Done — Come to Claude. Say **`Project 1 Done`**. We review and start Project 2. |
+
+---
+
+# 💰 WEEK 10–12 — PROJECT 2
+## SAAS EXPENSE MANAGER
+
+### WEEK 10
+
+| Day | What To Do |
+|---|---|
+| **Mon** | Multi-tenant planning — Understand tenancy, plan database isolation, draw architecture on paper. |
+| **Tue** | Company Registration — Company signs up, creates isolated workspace, company-specific login. |
+| **Wed** | Employee System — Admin adds employees. Three roles: Admin, Manager, Employee. Role permissions. |
+| **Thu** | Expense Module — Employee creates expense. Manager approves or rejects. Status flow. |
+| **Fri** | AI Insights — Monthly expenses sent to OpenAI. Plain English insights saved and returned via API. |
+| **Sat** | Subscription Logic — Free plan: max 5 employees, no AI. Pro plan: unlimited, AI enabled. |
+| **Sun** | Automated Reports — Celery monthly email to admin with expense report and AI insights. |
+
+### WEEK 11
+
+| Day | What To Do |
+|---|---|
+| **Week 11** | Testing & Bug Fixing — Test every endpoint. Fix all bugs. Clean up all code. |
+
+### WEEK 12
+
+| Day | What To Do |
+|---|---|
+| **Sat** | Final Deploy — Docker setup, deploy on Render, GitHub README with live URL and feature list. |
+| **Sun** | JOB READY — Come to Claude. Say **`Both Projects Done`**. We start interview preparation. |
+
+---
+
+# 🏁 COMPLETE SUMMARY
+
+| Weeks | Focus | Result |
+|---|---|---|
+| **Week 1–2** | Python OOP — Classes, Methods, Inheritance, Error Handling | ✅ Done |
+| **Week 3** | Django Basics — Models, ORM, Admin, PostgreSQL | ✅ Done |
+| **Week 4** | REST APIs — DRF, Full API with JWT Auth | ✅ Done |
+| **Week 5–6** | Production Skills — Git, Celery, OpenAI, Docker | 🚀 Deployed |
+| **Week 7–9** | Project 1 — AI Job Portal | 🌐 Live on Render |
+| **Week 10–12** | Project 2 — SaaS Expense Manager | 🌐 Live on Render |
+
+---
