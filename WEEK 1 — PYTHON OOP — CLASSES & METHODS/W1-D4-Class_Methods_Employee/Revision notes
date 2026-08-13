@@ -1,0 +1,62 @@
+**W1-D4-Revision-Class_Methods_Employee**
+
+---
+
+```
+KEY POINTS:
+- class variable = shared by ALL objects, defined at top of class
+- instance variable = belongs to one object, defined with self.x in __init__
+- Employee.total_employees = correct way to update class variable
+- self.total_employees = WRONG — creates separate copy per object
+- @classmethod = works on class itself, takes cls not self
+- cls = the class itself (Employee), not one specific object
+- classmethod callable on class directly: Employee.get_total()
+- from_string() = alternate way to create object from different input format
+- Django Post.objects.all/create/filter = same classmethod pattern
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+class Employee:
+    total_employees = 0       # class variable — shared by all
+    company_name = "TechCorp" # class variable — same for all
+
+    def __init__(self, name, salary):
+        self.name = name      # instance variable — separate per object
+        self.salary = salary
+        Employee.total_employees += 1  # update class variable correctly
+
+    @classmethod
+    def get_total_employees(cls):
+        return cls.total_employees  # cls = Employee class itself
+
+    @classmethod
+    def from_string(cls, data_string):
+        name, salary = data_string.split("-")  # "Ravi-30000" → ["Ravi","30000"]
+        return cls(name, int(salary))          # creates new Employee object
+
+
+e1 = Employee("Ravi", 30000)
+e2 = Employee("Sai", 40000)
+e3 = Employee.from_string("Kiran-28000")
+
+print(Employee.get_total_employees())  # 3
+print(Employee.company_name)           # TechCorp
+print(e3.name, e3.salary)             # Kiran 28000
+```
+
+---
+
+```
+DJANGO CONNECTION:
+Post.objects.all() = classmethod on Post class
+Post.objects.create() = same as from_string() — creates object
+Post.objects.filter() = works on class level data
+```
+
+---
+
+Say "W1 D5" when ready.
