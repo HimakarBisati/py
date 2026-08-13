@@ -1,0 +1,66 @@
+**W1-D3-Revision-Instance_Methods_Student**
+
+---
+
+```
+KEY POINTS:
+- instance method = method that works on one object's data using self
+- method can call another method inside same class using self.methodname()
+- return = sends value back so other methods/code can use it
+- print = just displays, value gone after — returns None by default
+- never use print inside a method if another method needs that value
+- sum() = adds all numbers in list
+- len() = counts items in list
+- max() = finds highest in list
+- min() = finds lowest in list
+- reuse methods instead of repeating same logic
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+class Student:
+    def __init__(self, name, marks):
+        self.name = name
+        self.marks = marks  # list [80, 45, 60]
+
+    def average(self):
+        return sum(self.marks) / len(self.marks)  # return not print
+
+    def result(self):
+        avg = self.average()  # calling another method inside same class
+        return "Pass" if avg >= 40 else "Fail"
+
+    def grade(self):
+        avg = self.average()  # reusing average() not recalculating
+        if avg >= 75: return "A"
+        elif avg >= 60: return "B"
+        elif avg >= 40: return "C"
+        else: return "F"
+
+    def highest_mark(self):
+        return max(self.marks)
+
+    def lowest_mark(self):
+        return min(self.marks)
+
+
+s1 = Student("Ravi", [80, 45, 60])
+print(s1.name, s1.result(), s1.grade(), s1.highest_mark(), s1.lowest_mark())
+# Ravi Pass B 80 45
+```
+
+---
+
+```
+DJANGO CONNECTION:
+is_shortlisted() = same as result()
+get_status_display() = same as grade()
+return value from method = used in views/serializers later
+```
+
+---
+
+Say "W1 D4" when ready.
