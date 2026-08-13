@@ -1,0 +1,71 @@
+**W1-D2-Revision-Init_and_Self_BankAccount**
+
+---
+
+```
+KEY POINTS:
+- state = object data that changes over time
+- self.balance += amount = update permanently on object
+- local variable inside method = lost when method finishes
+- always use self.x to update, never local variable
+- validate before changing state — block invalid input
+- return inside method = stop immediately, don't continue
+- one method can work on two objects at once (transfer)
+- Django model fields = same as self.balance — state that changes
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+class BankAccount:
+    def __init__(self, owner, balance):
+        self.owner = owner
+        self.balance = balance
+
+    def deposit(self, amount):
+        if amount <= 0:
+            print("Invalid amount")
+            return
+        self.balance += amount
+        print(f"Deposited {amount}. New balance: {self.balance}")
+
+    def withdraw(self, amount):
+        if amount <= 0:
+            print("Invalid amount")
+            return
+        if amount > self.balance:
+            print("Insufficient funds")
+            return
+        self.balance -= amount
+        print(f"Withdrew {amount}. New balance: {self.balance}")
+
+    def show_balance(self):
+        print(f"{self.owner}'s balance: {self.balance}")
+
+    def transfer(self, other_account, amount):
+        if amount > self.balance:
+            print("Insufficient funds")
+            return
+        self.balance -= amount
+        other_account.balance += amount
+        print(f"Transferred {amount} to {other_account.owner}")
+
+acc1 = BankAccount("Ravi", 1000)
+acc1.deposit(200)    # 1200
+acc1.withdraw(300)   # 900
+acc1.show_balance()  # Ravi's balance: 900
+```
+
+---
+
+```
+DJANGO CONNECTION:
+self.status = "approved" = same as self.balance += amount
+self.save() = Django saves changed state to database
+```
+
+---
+
+Say "W1 D3" when ready.
