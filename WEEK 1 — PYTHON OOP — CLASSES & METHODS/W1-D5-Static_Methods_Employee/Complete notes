@@ -1,0 +1,199 @@
+**W1-D5-Static_Methods_Employee**
+
+---
+
+**What and Why:**
+Yesterday you learned `@classmethod` which works on the class using `cls`. Today you learn `@staticmethod` — a method that belongs to the class but doesn't need `self` or `cls` at all. It's just a helper/utility function kept inside the class because it's logically related. Real backend code is full of static methods for validation — checking salary range, email format, password strength before saving to database.
+
+---
+
+```python
+# ============================================================
+# CONCEPT 1: STATIC METHOD — NO SELF, NO CLS
+# ============================================================
+
+class Employee:
+    total_employees = 0
+    company_name = "TechCorp"
+
+    def __init__(self, name, salary):
+        self.name = name
+        self.salary = salary
+        Employee.total_employees += 1
+
+        if not Employee.is_valid_salary(salary):
+            # calling static method inside __init__ to validate before saving
+            # if salary invalid, print warning but still create object
+            print(f"Warning: {name} has invalid salary")
+
+        if not Employee.is_valid_name(name):
+            # validate name before saving
+            print(f"Warning: {name} is not a valid name")
+
+    @classmethod
+    def get_total_employees(cls):
+        return cls.total_employees
+
+    @classmethod
+    def from_string(cls, data_string):
+        name, salary = data_string.split("-")
+        return cls(name, int(salary))
+
+    @staticmethod
+    def is_valid_salary(salary):
+        # @staticmethod — no self, no cls
+        # doesn't need any object's data or class data
+        # just takes a value, checks it, returns True or False
+        # pure utility function — logically related to Employee but independent
+        return salary > 0
+        # True if salary positive, False if zero or negative
+
+    @staticmethod
+    def calculate_bonus(salary, percentage):
+        # pure calculation — doesn't need object or class data
+        # takes two numbers, returns result
+        return salary * (percentage / 100)
+        # example: calculate_bonus(30000, 10) = 3000.0
+
+    @staticmethod
+    def is_valid_name(name):
+        return name.isalpha() and len(name) > 0
+        # isalpha() = True only if ALL characters are letters
+        # "Ravi" = True
+        # "Ravi123" = False — contains numbers
+        # "" = False — empty string
+        # and len(name) > 0 = makes sure name not empty
+
+
+# ============================================================
+# CREATING OBJECTS AND TESTING
+# ============================================================
+
+e1 = Employee("Ravi", 30000)    # valid — no warning
+e2 = Employee("Sai", -5000)     # invalid salary — prints warning
+e3 = Employee("Ravi123", 40000) # invalid name — prints warning
+
+print(Employee.is_valid_salary(30000))      # True
+print(Employee.is_valid_salary(-100))       # False
+print(Employee.calculate_bonus(30000, 10))  # 3000.0
+print(Employee.is_valid_name("Ravi"))       # True
+print(Employee.is_valid_name("Ravi123"))    # False
+print(Employee.company_name)                # TechCorp
+print(Employee.get_total_employees())       # 3
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 2: THREE METHOD TYPES — FULL COMPARISON
+# ============================================================
+
+class Example:
+    class_variable = "shared"
+
+    def instance_method(self):
+        # has self — works on one specific object's data
+        # called as: obj.instance_method()
+        # use when: you need this object's data (self.name, self.balance)
+        print(self.class_variable)  # can access class variable too
+
+    @classmethod
+    def class_method(cls):
+        # has cls — works on class itself and class variables
+        # called as: Example.class_method() or obj.class_method()
+        # use when: you need class-level data or creating objects
+        print(cls.class_variable)
+
+    @staticmethod
+    def static_method(value):
+        # no self, no cls — independent utility function
+        # called as: Example.static_method(value)
+        # use when: logic is related to class but needs no object/class data
+        # validation, calculations, formatting
+        return value > 0
+```
+
+---
+
+```python
+# ============================================================
+# COMMON MISTAKE — WHAT BREAKS WITHOUT @STATICMETHOD
+# ============================================================
+
+class EmployeeWrong:
+    def is_valid_salary(salary):
+        # no @staticmethod decorator
+        # no self parameter
+        return salary > 0
+
+e1 = EmployeeWrong()
+e1.is_valid_salary(30000)
+# CRASH: TypeError: is_valid_salary() takes 1 positional argument but 2 were given
+# Python automatically passes e1 as first argument
+# but there's no self parameter to receive it
+# @staticmethod tells Python: don't pass anything automatically
+
+
+class EmployeeCorrect:
+    @staticmethod
+    def is_valid_salary(salary):
+        # @staticmethod = Python skips auto-passing object
+        # salary receives 30000 correctly
+        return salary > 0
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — HOW THIS LOOKS IN REAL PROJECT
+# ============================================================
+
+# In your AI Job Portal (Week 7), you will write:
+
+class Job(models.Model):
+    title = models.CharField()
+    salary = models.IntegerField()
+
+    @staticmethod
+    def is_valid_salary(salary):
+        # same pattern — validate before saving to database
+        return salary > 0
+
+    @staticmethod
+    def is_valid_title(title):
+        # validate job title before saving
+        return len(title) >= 3
+
+# In your view, before creating a job:
+# if not Job.is_valid_salary(salary):
+#     return Response({"error": "Invalid salary"}, status=400)
+# same validation pattern, now in real backend API
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Add these static methods to your Employee class:
+- `is_valid_email(email)` → True if "@" in email and "." in email
+- `calculate_tax(salary)` → returns `salary * 0.1` (10% tax)
+- `is_senior(age)` → True if age >= 60
+Test all three by calling directly on class without creating object.
+
+**Q2:** Create a `Hospital` class with:
+- class variable `total_patients = 0`
+- `__init__` takes `patient_name`, `age` — increment total on creation
+- `@classmethod get_total()` — returns total patients
+- `@staticmethod is_valid_age(age)` → True if 0 < age < 150
+- `@staticmethod is_emergency(temperature)` → True if temperature > 103
+Create 3 patients, test all methods.
+
+**Q3:** What are the three method types, when do you use each? Write one line answer for each, then write one example of each inside a single class called `Library`.
+
+---
+
+Say "Revision Notes W1 D5" for revision notes or "W1 D6" to continue.
