@@ -1,0 +1,207 @@
+**W1-D3-Instance_Methods_Student**
+
+---
+
+**What and Why:**
+Instance methods = methods that work on one specific object's data using `self`. You've been doing this since Day 1 — today's just the formal name. New things today: a method calling another method inside same class, and understanding `return` vs `print` properly. This is critical — getting this wrong causes real bugs in Django views later.
+
+---
+
+```python
+# ============================================================
+# CONCEPT 1: INSTANCE METHODS AND RETURN VS PRINT
+# ============================================================
+
+class Student:
+    def __init__(self, name, marks):
+        self.name = name
+        self.marks = marks
+        # marks = list of numbers — example: [80, 45, 60]
+        # one student can have marks for multiple subjects
+        # list = [80, 45, 60] means 3 subjects, scores 80, 45, 60
+
+    def average(self):
+        # sum() = built-in Python function, adds all numbers in list
+        # sum([80, 45, 60]) = 185
+        # len() = built-in Python function, counts items in list
+        # len([80, 45, 60]) = 3
+        # 185 / 3 = 61.6
+        return sum(self.marks) / len(self.marks)
+        # RETURN not print — because result() needs this number
+        # if we print here, value disappears — result() gets None, crashes
+
+    def result(self):
+        avg = self.average()
+        # calling another method inside same class using self.methodname()
+        # avg now holds the number returned by average()
+        # this is normal — methods can call other methods on same object
+
+        if avg >= 40:
+            return "Pass"
+        else:
+            return "Fail"
+
+    def grade(self):
+        avg = self.average()
+        # reusing average() instead of recalculating
+        # this is good practice — never repeat same logic twice
+
+        if avg >= 75:
+            return "A"
+        elif avg >= 60:
+            return "B"
+        elif avg >= 40:
+            return "C"
+        else:
+            return "F"  # below 40
+
+    def highest_mark(self):
+        return max(self.marks)
+        # max() = built-in Python function
+        # finds highest number in list automatically
+        # max([80, 45, 60]) = 80
+
+    def lowest_mark(self):
+        return min(self.marks)
+        # min() = built-in Python function
+        # finds lowest number in list
+        # min([80, 45, 60]) = 45
+
+
+# ============================================================
+# CREATING OBJECTS AND TESTING
+# ============================================================
+
+s1 = Student("Ravi", [80, 45, 60])
+s2 = Student("Sai", [30, 25, 35])
+
+print(s1.name, "->", s1.result(), s1.grade(), s1.highest_mark(), s1.lowest_mark())
+# Ravi -> Pass B 80 45
+
+print(s2.name, "->", s2.result(), s2.grade(), s2.highest_mark(), s2.lowest_mark())
+# Sai -> Fail F 35 25
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 2: WHY RETURN NOT PRINT — CRITICAL TO UNDERSTAND
+# ============================================================
+
+# WRONG WAY — using print inside average()
+class StudentWrong:
+    def __init__(self, name, marks):
+        self.name = name
+        self.marks = marks
+
+    def average(self):
+        print(sum(self.marks) / len(self.marks))
+        # print shows value on screen BUT returns None by default
+        # function with no return statement always returns None
+
+    def result(self):
+        avg = self.average()
+        # avg = None here, not a number
+        # average() printed the value but didn't send it back
+        if avg >= 40:
+            # None >= 40 = TypeError: crash
+            # this is why return matters
+            return "Pass"
+
+
+# CORRECT WAY — using return inside average()
+class StudentCorrect:
+    def average(self):
+        return sum(self.marks) / len(self.marks)
+        # return sends actual number back
+        # avg in result() gets real number, not None
+        # no crash, works correctly
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 3: METHOD CALLING ANOTHER METHOD
+# ============================================================
+
+class Calculator:
+    def __init__(self, numbers):
+        self.numbers = numbers
+
+    def total(self):
+        return sum(self.numbers)
+        # returns total of all numbers
+
+    def count(self):
+        return len(self.numbers)
+        # returns how many numbers
+
+    def average(self):
+        return self.total() / self.count()
+        # calling self.total() and self.count() inside same class
+        # reusing existing methods instead of rewriting logic
+        # this is exactly how real backend code is structured
+
+
+c1 = Calculator([10, 20, 30, 40])
+print(c1.average())  # 25.0
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — HOW THIS LOOKS IN REAL PROJECT
+# ============================================================
+
+# In your AI Job Portal (Week 7), you will write:
+
+class JobApplication(models.Model):
+    resume_score = models.IntegerField()
+    status = models.CharField()
+
+    def is_shortlisted(self):
+        # same as is_pass() — decision based on object's own data
+        return self.resume_score >= 70
+
+    def get_status_display(self):
+        # same as result() — returns value based on object data
+        if self.resume_score >= 70:
+            return "Shortlisted"
+        return "Rejected"
+
+# is_shortlisted() and get_status_display() = same pattern as
+# result() and grade() in Student class
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Create an `Exam` class — attributes: `subject`, `marks` (list). Methods: `average()`, `result()` (Pass if avg >= 50), `grade()` (A/B/C/F), `highest()`, `lowest()`. Create 3 Exam objects with different marks, print all results.
+
+**Q2:** Create a `Cricket` class — attributes: `player_name`, `scores` (list of match scores). Methods: `total_runs()` using `sum()`, `average_runs()` calling `self.total_runs()`, `is_consistent()` → True if average >= 40. Create 2 players, test all methods.
+
+**Q3:** Why does this crash? Fix it:
+```python
+class Test:
+    def __init__(self, numbers):
+        self.numbers = numbers
+
+    def total(self):
+        print(sum(self.numbers))
+
+    def average(self):
+        return self.total() / len(self.numbers)
+
+t = Test([10, 20, 30])
+print(t.average())
+```
+
+---
+
+Say "Revision Notes W1 D3" for revision notes or "W1 D4" to continue.
