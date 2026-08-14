@@ -1,0 +1,92 @@
+**W1-D6-Practice_Day**
+
+---
+
+**What and Why:**
+No new topic today. This is the most important day of the week. Rebuilding from memory is what separates "I followed along" from "I actually know this." Every gap you find today is better than finding it in an interview. Real coders retain knowledge by rebuilding, not re-reading.
+
+---
+
+**WHAT TO DO — IN ORDER:**
+
+```
+STEP 1: Close all notes, open blank file
+STEP 2: Rebuild each class from memory
+STEP 3: Run it, check output
+STEP 4: Only after all done — open notes and compare
+STEP 5: Note exactly where you got stuck — that's your gap
+```
+
+---
+
+**REBUILD THESE FROM MEMORY:**
+
+```
+1. BankAccount (W1 D2)
+   - __init__ with owner and balance
+   - deposit with validation (block zero and negative)
+   - withdraw with validation (block zero, negative, overdraft)
+   - show_balance
+   - transfer to another account
+
+2. Student (W1 D3)
+   - __init__ with name and marks list
+   - average using sum() and len()
+   - result calling self.average() — Pass/Fail
+   - grade calling self.average() — A/B/C/F
+   - highest_mark using max()
+   - lowest_mark using min()
+
+3. Employee (W1 D4 + D5)
+   - class variable total_employees
+   - class variable company_name
+   - __init__ incrementing total, validating salary and name
+   - @classmethod get_total_employees
+   - @classmethod from_string splitting string to create object
+   - @staticmethod is_valid_salary
+   - @staticmethod calculate_bonus
+   - @staticmethod is_valid_name
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+After rebuilding all three, answer these without looking at notes:
+
+**Q1:** Create a `Hospital` class from scratch:
+- class variable `total_patients = 0`
+- `__init__` takes `patient_name`, `age`, `temperature`
+- increment total on creation
+- validate age (0-150) and temperature (must be > 0) in `__init__`
+- `@classmethod get_total_patients()`
+- `@classmethod from_string(cls, data)` — takes `"Ravi-25-98"`, creates Patient
+- `@staticmethod is_emergency(temperature)` → True if temperature > 103
+- `@staticmethod is_valid_age(age)` → True if 0 < age < 150
+- Instance method `patient_info()` → prints all patient details
+Create 3 patients, test everything.
+
+**Q2:** Create a `Inventory` class:
+- class variable `total_items = 0`
+- `__init__` takes `item_name`, `quantity`, `price`
+- `add_stock(amount)` → adds to quantity, blocks if amount <= 0
+- `sell_stock(amount)` → reduces quantity, blocks if amount > quantity
+- `show_info()` → prints all details
+- `@staticmethod is_valid_price(price)` → True if price > 0
+- `@staticmethod is_valid_quantity(quantity)` → True if quantity >= 0
+Create 2 inventory items, test all methods.
+
+---
+
+```
+AFTER REBUILDING — CHECK YOURSELF:
+✓ Did you remember @classmethod and @staticmethod decorators?
+✓ Did you use Employee.total not self.total for class variable?
+✓ Did you use return not print inside average()?
+✓ Did you call self.average() inside result() and grade()?
+✓ Did you validate in deposit/withdraw before changing state?
+```
+
+---
+
+Say "Revision Notes W1 D6" for revision notes or "W1 D7" to continue.
