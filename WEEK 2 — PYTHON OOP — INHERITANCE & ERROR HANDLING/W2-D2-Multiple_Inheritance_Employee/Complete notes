@@ -1,0 +1,222 @@
+**W2-D2-Multiple_Inheritance_Employee**
+
+---
+
+**What and Why:**
+Yesterday child class only added its own sound — parent's `__init__` was enough. Today child class needs **extra attributes** on top of parent's. New concept: `super()` — calls parent's method from inside child. This is how Django model inheritance works — child model gets all parent fields plus adds its own extra fields.
+
+---
+
+```python
+# ============================================================
+# CONCEPT 1: CHILD CLASS WITH EXTRA ATTRIBUTES — super()
+# ============================================================
+
+class Employee:  # PARENT CLASS
+    def __init__(self, name, salary):
+        self.name = name
+        self.salary = salary
+        # parent saves name and salary on every Employee object
+
+    def info(self):
+        print(f"{self.name} earns {self.salary}")
+
+    def give_raise(self, amount):
+        self.salary += amount
+        # adds amount to salary — state changing
+        print(f"{self.name} new salary: {self.salary}")
+
+
+class Manager(Employee):  # Manager inherits from Employee
+    def __init__(self, name, salary, team_size):
+        super().__init__(name, salary)
+        # super() = calls parent's __init__ from inside child
+        # super().__init__(name, salary) = Employee.__init__(self, name, salary)
+        # lets parent set up name and salary first
+        # WITHOUT this line: self.name and self.salary never get set
+        # child's __init__ completely replaces parent's — must call super() manually
+
+        self.team_size = team_size
+        # adding extra attribute on top of what parent set up
+        # Manager has name, salary (from parent) + team_size (own)
+
+    def info(self):
+        super().info()
+        # super().info() = calls parent's info() first
+        # prints: "Ravi earns 60000"
+        # then adds Manager-specific info below
+        print(f"Manages a team of {self.team_size}")
+        # full output:
+        # Ravi earns 60000
+        # Manages a team of 5
+
+
+class Developer(Employee):
+    def __init__(self, name, salary, tech_stack):
+        super().__init__(name, salary)
+        # same pattern — let parent set up name and salary
+        self.tech_stack = tech_stack
+        # Developer's own extra attribute
+
+    def info(self):
+        super().info()
+        # calls parent's info() first
+        print(f"Works with: {self.tech_stack}")
+
+
+class Intern(Employee):
+    def __init__(self, name, salary, mentor):
+        super().__init__(name, salary)
+        self.mentor = mentor
+        # Intern's own extra attribute
+
+    def info(self):
+        super().info()
+        print(f"Mentored by: {self.mentor}")
+
+
+# ============================================================
+# CREATING OBJECTS AND TESTING
+# ============================================================
+
+m1 = Manager("Ravi", 60000, 5)
+d1 = Developer("Sai", 50000, "Python, Django")
+i1 = Intern("Kiran", 15000, "Ravi")
+
+m1.info()
+# Ravi earns 60000
+# Manages a team of 5
+
+d1.info()
+# Sai earns 50000
+# Works with: Python, Django
+
+i1.info()
+# Kiran earns 15000
+# Mentored by: Ravi
+
+# give_raise() inherited from parent — works on all children
+m1.give_raise(10000)  # Ravi new salary: 70000
+d1.give_raise(5000)   # Sai new salary: 55000
+i1.give_raise(2000)   # Kiran new salary: 17000
+# no need to rewrite give_raise() in any child — inherited automatically
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 2: WHAT BREAKS WITHOUT super()
+# ============================================================
+
+class ManagerWrong(Employee):
+    def __init__(self, name, salary, team_size):
+        # forgot super().__init__(name, salary)
+        self.team_size = team_size
+        # only team_size saved — name and salary never set
+
+m_wrong = ManagerWrong("Ravi", 60000, 5)
+print(m_wrong.team_size)  # 5 — works
+print(m_wrong.name)       # AttributeError: has no attribute 'name'
+# name was never saved because parent's __init__ never ran
+# always call super().__init__() first thing in child's __init__
+
+
+class ManagerCorrect(Employee):
+    def __init__(self, name, salary, team_size):
+        super().__init__(name, salary)  # parent runs first — name, salary saved
+        self.team_size = team_size      # then add own attribute
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 3: super() IN METHOD — NOT JUST __init__
+# ============================================================
+
+class Animal:
+    def describe(self):
+        print("I am an animal")
+
+class Dog(Animal):
+    def describe(self):
+        super().describe()      # calls Animal's describe() first
+        print("I am a Dog")     # then adds own line
+
+d = Dog()
+d.describe()
+# I am an animal
+# I am a Dog
+
+# super() works in any method, not just __init__
+# use it when you want parent's behaviour PLUS extra child behaviour
+# skip it when you want to COMPLETELY replace parent's behaviour
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — HOW THIS LOOKS IN REAL PROJECT
+# ============================================================
+
+# In your AI Job Portal (Week 7), you will write:
+
+from django.contrib.auth.models import AbstractUser
+
+class CustomUser(AbstractUser):
+    # AbstractUser = parent class (Django's built-in user)
+    # CustomUser = child class with extra fields
+
+    # super().__init__ handled by Django automatically here
+    # just add your extra fields:
+
+    phone_number = models.CharField(max_length=15)
+    user_type = models.CharField(max_length=20)
+    # choices: "admin", "company", "candidate"
+
+    # AbstractUser already has: username, email, password, first_name, last_name
+    # CustomUser adds: phone_number, user_type on top
+    # exactly like Manager adding team_size on top of Employee's name, salary
+
+# class CustomUser(AbstractUser) = class Manager(Employee)
+# phone_number, user_type = self.team_size
+# AbstractUser fields = self.name, self.salary
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Create a `Vehicle` parent class — `__init__` takes `brand`, `speed`. Method `info()` prints `f"{brand} goes {speed} km/h"`. Method `accelerate(amount)` adds amount to speed.
+
+Create 3 children:
+- `Car(brand, speed, num_doors)` — `info()` calls `super().info()` then prints doors
+- `Bike(brand, speed, bike_type)` — `info()` calls `super().info()` then prints type
+- `Truck(brand, speed, capacity)` — `info()` calls `super().info()` then prints capacity
+
+Test `accelerate()` on all three — should work without rewriting in children.
+
+**Q2:** What is wrong here and why? Fix it:
+```python
+class Animal:
+    def __init__(self, name):
+        self.name = name
+
+class Dog(Animal):
+    def __init__(self, name, breed):
+        self.breed = breed
+
+d = Dog("Rex", "Labrador")
+print(d.name)   # crashes — why?
+print(d.breed)  # works — why?
+```
+
+**Q3:** Create a `Person` parent class — `__init__` takes `name`, `age`. Method `greet()` prints `f"Hi I'm {name}"`. Create children `Student(name, age, grade)` and `Teacher(name, age, subject)`. Both call `super().greet()` then print their own extra info. Create 2 of each, test all methods.
+
+---
+
+Say "Revision Notes W2 D2" for revision or "W2 D3" to continue.
