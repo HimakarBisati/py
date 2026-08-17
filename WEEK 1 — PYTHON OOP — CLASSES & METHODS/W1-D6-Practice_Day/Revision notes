@@ -1,0 +1,128 @@
+**W1-D6-Revision-Practice_Day**
+
+---
+
+```
+KEY POINTS — WHAT TO REMEMBER FROM ALL W1:
+
+DAY 1 — CLASS & OBJECT:
+- class = blueprint, object = real thing
+- __init__ runs automatically when object created
+- self = this specific object
+- self.x = x = permanently store on object
+
+DAY 2 — STATE & VALIDATION:
+- state = data that changes over time
+- self.balance += amount = update permanently
+- always validate before changing state
+- return inside method = stop immediately
+
+DAY 3 — INSTANCE METHODS:
+- method can call another method: self.average()
+- return = sends value back (reusable)
+- print = just displays, returns None
+- sum(), len(), max(), min() = built-in list functions
+
+DAY 4 — CLASS METHODS:
+- class variable = shared by ALL objects
+- Employee.total not self.total = correct
+- @classmethod takes cls not self
+- from_string() = create object from different format
+
+DAY 5 — STATIC METHODS:
+- @staticmethod = no self, no cls
+- use for validation and calculations
+- without decorator = Python crashes auto-passing object
+- isalpha() = True only if all letters
+```
+
+---
+
+```python
+# QUICK REFERENCE — ALL THREE CLASSES
+
+class BankAccount:
+    def __init__(self, owner, balance):
+        self.owner = owner
+        self.balance = balance
+
+    def deposit(self, amount):
+        if amount <= 0: print("Invalid"); return
+        self.balance += amount
+
+    def withdraw(self, amount):
+        if amount <= 0: print("Invalid"); return
+        if amount > self.balance: print("Insufficient"); return
+        self.balance -= amount
+
+    def show_balance(self):
+        print(f"{self.owner}: {self.balance}")
+
+    def transfer(self, other, amount):
+        if amount > self.balance: print("Insufficient"); return
+        self.balance -= amount
+        other.balance += amount
+
+
+class Student:
+    def __init__(self, name, marks):
+        self.name = name
+        self.marks = marks
+
+    def average(self):
+        return sum(self.marks) / len(self.marks)
+
+    def result(self):
+        return "Pass" if self.average() >= 40 else "Fail"
+
+    def grade(self):
+        avg = self.average()
+        if avg >= 75: return "A"
+        elif avg >= 60: return "B"
+        elif avg >= 40: return "C"
+        else: return "F"
+
+    def highest_mark(self): return max(self.marks)
+    def lowest_mark(self): return min(self.marks)
+
+
+class Employee:
+    total_employees = 0
+    company_name = "TechCorp"
+
+    def __init__(self, name, salary):
+        self.name = name
+        self.salary = salary
+        Employee.total_employees += 1
+        if not Employee.is_valid_salary(salary):
+            print(f"Warning: invalid salary")
+
+    @classmethod
+    def get_total_employees(cls):
+        return cls.total_employees
+
+    @classmethod
+    def from_string(cls, data):
+        name, salary = data.split("-")
+        return cls(name, int(salary))
+
+    @staticmethod
+    def is_valid_salary(salary): return salary > 0
+    @staticmethod
+    def calculate_bonus(salary, pct): return salary * (pct/100)
+    @staticmethod
+    def is_valid_name(name): return name.isalpha() and len(name) > 0
+```
+
+---
+
+```
+THREE METHOD TYPES — QUICK REFERENCE:
+instance method = self = one object's data
+@classmethod = cls = class level data
+@staticmethod = nothing = utility/validation
+```
+
+---
+
+Say "W1 D7" when ready.
