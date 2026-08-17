@@ -1,0 +1,81 @@
+**W2-D3-Revision-Encapsulation_Private_Variables**
+
+---
+
+```
+KEY POINTS:
+- encapsulation = hiding internal data from outside access
+- double underscore __ = private attribute
+- private attribute = only accessible inside class through methods
+- getter = controlled way to READ private data
+- setter = controlled way to CHANGE private data
+- without encapsulation = anyone can set balance = -99999, no error
+- with encapsulation = must go through setter which validates first
+- name mangling = Python renames __x to _ClassName__x internally
+- never access private data using _ClassName__x — breaks encapsulation
+- Django model fields = controlled setters — validate before saving
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+class BankAccount:
+    def __init__(self, owner, balance, pin):
+        self.owner = owner          # public — accessible from anywhere
+        self.__balance = balance    # private — blocked from outside
+        self.__pin = pin            # private — blocked from outside
+
+    def deposit(self, amount):
+        if amount <= 0:
+            print("Invalid amount"); return
+        self.__balance += amount    # accessing private inside class — allowed
+        print(f"Deposited {amount}. New balance: {self.__balance}")
+
+    def withdraw(self, amount):
+        if amount <= 0:
+            print("Invalid amount"); return
+        if amount > self.__balance:
+            print("Insufficient funds"); return
+        self.__balance -= amount
+        print(f"Withdrew {amount}. New balance: {self.__balance}")
+
+    def get_balance(self):          # getter — read private data
+        return self.__balance
+
+    def set_balance(self, amount):  # setter — change private data with validation
+        if amount >= 0:
+            self.__balance = amount
+        else:
+            print("Balance cannot be negative")
+
+    def change_pin(self, old_pin, new_pin):
+        if old_pin == self.__pin:
+            self.__pin = new_pin
+            print("PIN changed successfully")
+        else:
+            print("Wrong PIN")
+
+
+acc1 = BankAccount("Ravi", 1000, 1234)
+acc1.deposit(500)
+print(acc1.get_balance())    # 1500
+acc1.set_balance(-500)       # blocked
+acc1.change_pin(1234, 5678)  # PIN changed
+# acc1.__balance             # AttributeError — blocked
+```
+
+---
+
+```
+DJANGO CONNECTION:
+update_status() in model = same as set_balance()
+validates before changing — same encapsulation pattern
+models.IntegerField = validates data type before saving
+raise ValueError = same as printing "Invalid" in setter
+```
+
+---
+
+Say "W2 D4" when ready.
