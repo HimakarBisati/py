@@ -1,0 +1,80 @@
+**W2-D1-Revision-Inheritance_Animal**
+
+---
+
+```
+KEY POINTS:
+- inheritance = child class reuses parent's code
+- class Dog(Animal) = Dog inherits from Animal
+- child gets everything from parent automatically
+- override = child replaces parent's method with own version
+- Python checks child first, then parent if not found
+- info() not overridden = all children use parent's version
+- polymorphism = same method name, different behaviour per object
+- loop through different objects, call same method = polymorphism
+- Django APIView = parent class, your view = child class
+- def get(self, request) in your view = overriding parent's get()
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+class Animal:
+    def __init__(self, name):
+        self.name = name
+
+    def sound(self):
+        print("Some generic animal sound")
+
+    def info(self):
+        print(f"{self.name} is an animal")  # inherited by all children
+
+
+class Dog(Animal):
+    def sound(self):
+        print(f"{self.name} says Woof!")  # overrides parent
+
+
+class Cat(Animal):
+    def sound(self):
+        print(f"{self.name} says Meow!")  # overrides parent
+
+
+class Bird(Animal):
+    def sound(self):
+        print(f"{self.name} says Tweet!")  # overrides parent
+
+
+class Fish(Animal):
+    pass  # no override — uses parent's sound()
+
+
+d1 = Dog("Rex")
+c1 = Cat("Whiskers")
+f1 = Fish("Nemo")
+
+d1.sound()   # Rex says Woof!
+c1.sound()   # Whiskers says Meow!
+f1.sound()   # Some generic animal sound — falls back to parent
+d1.info()    # Rex is an animal — inherited from parent
+
+# polymorphism
+animals = [Dog("Rex"), Cat("Whiskers"), Bird("Kiwi")]
+for animal in animals:
+    animal.sound()  # each handles differently
+```
+
+---
+
+```
+DJANGO CONNECTION:
+class JobListView(APIView) = class Dog(Animal)
+def get(self, request) = def sound(self)
+override only what's different, inherit the rest
+```
+
+---
+
+Say "W2 D2" when ready.
