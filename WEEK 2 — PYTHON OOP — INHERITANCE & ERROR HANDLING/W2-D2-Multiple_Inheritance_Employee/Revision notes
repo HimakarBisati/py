@@ -1,0 +1,90 @@
+**W2-D2-Revision-Multiple_Inheritance_Employee**
+
+---
+
+```
+KEY POINTS:
+- super() = calls parent's method from inside child
+- always call super().__init__() FIRST in child's __init__
+- without super().__init__() = parent never runs = self.name crashes
+- child gets parent attributes + adds own extra attributes
+- super().info() = run parent's info() first, then add own lines
+- give_raise() inherited = works on all children without rewriting
+- use super() when you want parent behaviour PLUS extra
+- skip super() when you want to COMPLETELY replace parent behaviour
+- Django CustomUser(AbstractUser) = same pattern as Manager(Employee)
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+class Employee:
+    def __init__(self, name, salary):
+        self.name = name
+        self.salary = salary
+
+    def info(self):
+        print(f"{self.name} earns {self.salary}")
+
+    def give_raise(self, amount):
+        self.salary += amount
+        print(f"{self.name} new salary: {self.salary}")
+
+
+class Manager(Employee):
+    def __init__(self, name, salary, team_size):
+        super().__init__(name, salary)  # parent runs first
+        self.team_size = team_size      # own extra attribute
+
+    def info(self):
+        super().info()                  # parent's info first
+        print(f"Manages a team of {self.team_size}")
+
+
+class Developer(Employee):
+    def __init__(self, name, salary, tech_stack):
+        super().__init__(name, salary)
+        self.tech_stack = tech_stack
+
+    def info(self):
+        super().info()
+        print(f"Works with: {self.tech_stack}")
+
+
+class Intern(Employee):
+    def __init__(self, name, salary, mentor):
+        super().__init__(name, salary)
+        self.mentor = mentor
+
+    def info(self):
+        super().info()
+        print(f"Mentored by: {self.mentor}")
+
+
+m1 = Manager("Ravi", 60000, 5)
+d1 = Developer("Sai", 50000, "Python, Django")
+i1 = Intern("Kiran", 15000, "Ravi")
+
+m1.info()
+d1.info()
+i1.info()
+
+m1.give_raise(10000)  # inherited — no rewrite needed
+d1.give_raise(5000)
+```
+
+---
+
+```
+DJANGO CONNECTION:
+class CustomUser(AbstractUser) = class Manager(Employee)
+phone_number, user_type = self.team_size
+AbstractUser fields = self.name, self.salary
+super().__init__() = Django handles automatically in models
+```
+
+---
+
+Say "W2 D3" when ready.
