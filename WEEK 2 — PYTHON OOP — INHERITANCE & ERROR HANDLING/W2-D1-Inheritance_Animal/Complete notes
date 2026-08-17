@@ -1,0 +1,176 @@
+**W2-D1-Inheritance_Animal**
+
+---
+
+**What and Why:**
+Inheritance lets a child class reuse a parent's code and override specific parts. This is how Django's class-based views work — `APIView`, `ModelViewSet` are parent classes, you inherit from them and override only what's different. Without inheritance you'd rewrite same code in every class — that's what inheritance solves.
+
+---
+
+```python
+# ============================================================
+# CONCEPT 1: BASIC INHERITANCE — PARENT AND CHILD
+# ============================================================
+
+class Animal:  # PARENT CLASS — contains common code shared by all animals
+    def __init__(self, name):
+        self.name = name
+        # parent __init__ saves name on every animal object
+        # Dog, Cat, Bird all need a name — so it lives in parent
+
+    def sound(self):
+        print("Some generic animal sound")
+        # default sound — used when child doesn't override this method
+        # if child overrides it, parent's version is ignored for that child
+
+    def info(self):
+        print(f"{self.name} is an animal")
+        # this method is NOT overridden in any child
+        # so ALL children inherit and use this exact method
+        # no need to rewrite in Dog, Cat, Bird — that's the power of inheritance
+
+
+class Dog(Animal):  # Dog INHERITS from Animal
+    # Dog(Animal) means: Dog is a child of Animal
+    # Dog automatically gets everything Animal has — __init__, sound(), info()
+
+    def sound(self):
+        # OVERRIDING parent's sound() method
+        # Dog has its own sound — replaces parent's generic sound
+        # Python checks child first — if found, uses child's version
+        # if not found in child, goes to parent
+        print(f"{self.name} says Woof!")
+        # self.name works here because Dog inherited __init__ from Animal
+        # self.name was saved in Animal's __init__ — Dog can access it
+
+
+class Cat(Animal):
+    def sound(self):
+        # Cat overrides sound() with its own version
+        print(f"{self.name} says Meow!")
+
+
+class Bird(Animal):
+    def sound(self):
+        print(f"{self.name} says Tweet!")
+
+
+# ============================================================
+# CREATING OBJECTS AND TESTING
+# ============================================================
+
+d1 = Dog("Rex")
+c1 = Cat("Whiskers")
+b1 = Bird("Kiwi")
+a1 = Animal("Generic")  # plain Animal object — no override
+
+d1.sound()   # Rex says Woof! — Dog's own version
+c1.sound()   # Whiskers says Meow! — Cat's own version
+b1.sound()   # Kiwi says Tweet! — Bird's own version
+a1.sound()   # Some generic animal sound — parent's version
+
+# info() not overridden anywhere — all use parent's version
+d1.info()    # Rex is an animal
+c1.info()    # Whiskers is an animal
+b1.info()    # Kiwi is an animal
+# same method, different objects, different name printed
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 2: POLYMORPHISM WITH INHERITANCE
+# ============================================================
+
+# polymorphism = same method name, different behaviour per object
+# inheritance makes polymorphism possible
+
+animals = [Dog("Rex"), Cat("Whiskers"), Bird("Kiwi"), Animal("Generic")]
+
+for animal in animals:
+    animal.sound()
+    # same .sound() call on every object
+    # each object handles it differently based on its own class
+    # Dog → Woof, Cat → Meow, Bird → Tweet, Animal → generic
+    # no if/else needed — each class knows its own behaviour
+
+# Rex says Woof!
+# Whiskers says Meow!
+# Kiwi says Tweet!
+# Some generic animal sound
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 3: WHAT HAPPENS WITHOUT OVERRIDE
+# ============================================================
+
+class Fish(Animal):
+    pass
+    # pass = empty class body — Fish inherits everything from Animal
+    # no sound() override means Fish uses Animal's sound()
+
+f1 = Fish("Nemo")
+f1.sound()   # Some generic animal sound — falls back to parent
+f1.info()    # Nemo is an animal — inherited from parent
+
+# this shows Python's lookup order:
+# 1. Look in child class first
+# 2. If not found, look in parent class
+# 3. If not found in parent, look in grandparent (if exists)
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — HOW THIS LOOKS IN REAL PROJECT
+# ============================================================
+
+# In your AI Job Portal (Week 4), you will write:
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class JobListView(APIView):
+    # JobListView INHERITS from APIView — Django's parent class
+    # APIView has all the base functionality built in
+    # you only override the specific methods you need
+
+    def get(self, request):
+        # overriding get() — same as Dog overriding sound()
+        # APIView has a default get() — you replace it with your own
+        jobs = Job.objects.all()
+        return Response({"jobs": "data"})
+
+    def post(self, request):
+        # overriding post() — handle creating new job
+        pass
+
+# class JobListView(APIView) = class Dog(Animal)
+# def get(self, request) = def sound(self)
+# exact same inheritance pattern — different names
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Create a `Vehicle` parent class — `__init__` takes `brand`, `speed`. Method `move()` prints "Some vehicle is moving". Create 3 child classes: `Car`, `Bike`, `Truck` — each overrides `move()` with its own message including brand. Create one object of each, call `move()`. Also call a method `info()` from parent that prints `f"{brand} goes {speed} km/h"` — don't rewrite in children.
+
+**Q2:** Create a loop with all 3 vehicle objects in a list, call `move()` on each — show polymorphism in action.
+
+**Q3:** Create a `Shape` parent class with method `area()` returning 0. Create children: `Circle(radius)`, `Rectangle(width, height)`, `Triangle(base, height)`. Each overrides `area()` with correct formula:
+- Circle: `3.14 * radius * radius`
+- Rectangle: `width * height`
+- Triangle: `0.5 * base * height`
+Loop through all shapes, print name and area.
+
+---
+
+Say "Revision Notes W2 D1" for revision or "W2 D2" to continue.
