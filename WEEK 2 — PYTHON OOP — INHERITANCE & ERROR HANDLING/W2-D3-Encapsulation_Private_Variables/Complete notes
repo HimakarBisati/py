@@ -1,0 +1,223 @@
+**W2-D3-Encapsulation_Private_Variables**
+
+---
+
+**What and Why:**
+Encapsulation means hiding internal data so it can't be changed carelessly from outside. Without encapsulation anyone can write `acc.balance = -99999` directly and break your data silently — no error, just wrong data in database. This is why Django models use validation and why direct database edits are considered bad practice. Real backend APIs always control data access through methods, never expose raw data directly.
+
+---
+
+```python
+# ============================================================
+# CONCEPT 1: PRIVATE VARIABLES — DOUBLE UNDERSCORE
+# ============================================================
+
+class BankAccount:
+    def __init__(self, owner, balance, pin):
+        self.owner = owner
+        # public attribute — accessible from anywhere
+        # acc.owner = "Ravi" works from outside — that's fine
+
+        self.__balance = balance
+        # PRIVATE attribute — double underscore prefix
+        # acc.__balance from outside = AttributeError — blocked
+        # only accessible inside this class through methods
+        # forces every change to go through validation
+
+        self.__pin = pin
+        # private — nobody can read or change pin directly from outside
+        # must use change_pin() method which validates old pin first
+
+    def deposit(self, amount):
+        if amount <= 0:
+            print("Invalid amount")
+            return
+        self.__balance += amount
+        # accessing private attribute INSIDE class — allowed
+        # only inside the class can you use self.__balance
+        print(f"Deposited {amount}. New balance: {self.__balance}")
+
+    def withdraw(self, amount):
+        if amount <= 0:
+            print("Invalid amount")
+            return
+        if amount > self.__balance:
+            print("Insufficient funds")
+            return
+        self.__balance -= amount
+        print(f"Withdrew {amount}. New balance: {self.__balance}")
+
+    def get_balance(self):
+        # GETTER METHOD — controlled way to READ private data
+        # outside code calls this to see balance
+        # can add logic here — e.g. log every balance check
+        return self.__balance
+
+    def set_balance(self, amount):
+        # SETTER METHOD — controlled way to CHANGE private data
+        # validates before allowing change
+        if amount >= 0:
+            self.__balance = amount
+        else:
+            print("Balance cannot be negative")
+            # blocked — private data protected
+
+    def change_pin(self, old_pin, new_pin):
+        # validation — must know old pin to change it
+        if old_pin == self.__pin:
+            self.__pin = new_pin
+            print("PIN changed successfully")
+        else:
+            print("Wrong PIN")
+            # old pin doesn't match — change blocked
+
+
+# ============================================================
+# TESTING
+# ============================================================
+
+acc1 = BankAccount("Ravi", 1000, 1234)
+
+acc1.deposit(500)
+# Deposited 500. New balance: 1500
+
+print(acc1.get_balance())
+# 1500 — works through getter
+
+acc1.set_balance(-500)
+# Balance cannot be negative — blocked
+
+acc1.set_balance(2000)
+# allowed — positive value
+print(acc1.get_balance())
+# 2000
+
+acc1.change_pin(1234, 5678)
+# PIN changed successfully
+
+acc1.change_pin(1234, 9999)
+# Wrong PIN — blocked, old pin already changed
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 2: WHAT HAPPENS WITHOUT ENCAPSULATION
+# ============================================================
+
+class BankAccountWrong:
+    def __init__(self, owner, balance):
+        self.owner = owner
+        self.balance = balance  # public — no protection
+
+acc = BankAccountWrong("Ravi", 1000)
+acc.balance = -99999
+# NO ERROR — Python allows this
+# balance is now -99999 — data is broken
+# no validation, no protection
+# this is exactly the bug encapsulation prevents
+
+print(acc.balance)  # -99999 — silently wrong, no crash
+
+
+class BankAccountCorrect:
+    def __init__(self, owner, balance):
+        self.owner = owner
+        self.__balance = balance  # private — protected
+
+acc2 = BankAccountCorrect("Ravi", 1000)
+acc2.__balance = -99999
+# AttributeError — blocked from outside
+# must use set_balance() which validates first
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 3: NAME MANGLING — HOW PYTHON HIDES PRIVATE
+# ============================================================
+
+class Example:
+    def __init__(self):
+        self.__secret = "hidden"
+        # Python internally renames __secret to _Example__secret
+        # this is called name mangling
+        # so acc.__balance fails but acc._BankAccount__balance works
+        # but NEVER access private data this way in real code
+        # it breaks the whole point of encapsulation
+
+e = Example()
+# print(e.__secret)           # AttributeError — blocked
+# print(e._Example__secret)   # "hidden" — works but NEVER do this
+# use getter methods only — that's the correct approach
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — HOW THIS LOOKS IN REAL PROJECT
+# ============================================================
+
+# In your AI Job Portal (Week 7), you will write:
+
+class JobApplication(models.Model):
+    resume_score = models.IntegerField(default=0)
+    status = models.CharField(default="pending")
+
+    def update_status(self, new_status):
+        # controlled way to change status — same as set_balance()
+        # validates before allowing change
+        valid_statuses = ["pending", "shortlisted", "rejected"]
+        if new_status in valid_statuses:
+            self.status = new_status
+            self.save()  # saves to database
+        else:
+            raise ValueError("Invalid status")
+            # raise = trigger error — same as printing "Invalid" in BankAccount
+
+    # In Django, models.IntegerField, models.CharField = controlled setters
+    # they validate data type before saving to database
+    # same concept as __balance — controlled access to data
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Create a `PasswordManager` class:
+- Private attribute `__password`
+- Private attribute `__attempts = 0`
+- `check_password(entered)` → if correct print "Access granted", if wrong increment `__attempts`, if `__attempts >= 3` print "Account locked"
+- `change_password(old, new)` → only change if old matches current
+- `get_attempts()` → returns number of wrong attempts
+Test with correct and wrong passwords.
+
+**Q2:** Create a `Student` class:
+- Private `__marks` (list)
+- Private `__name`
+- `get_name()` → returns name
+- `add_mark(mark)` → adds to `__marks` if 0 <= mark <= 100, else blocks
+- `get_average()` → returns average of `__marks`
+- `get_marks()` → returns copy of marks list
+Create 2 students, add marks, test all methods.
+
+**Q3:** What is wrong here and why?
+```python
+class Salary:
+    def __init__(self, amount):
+        self.__amount = amount
+
+s = Salary(50000)
+s.__amount = -10000
+print(s.__amount)
+```
+Does this crash or silently create wrong data? Explain what actually happens.
+
+---
+
+Say "Revision Notes W2 D3" for revision or "W2 D4" to continue.
