@@ -1,0 +1,285 @@
+**W3-D1-Django_Setup**
+
+---
+
+**What and Why:**
+Django is a Python web framework — it gives you everything needed to build a backend API fast. Instead of writing raw Python server code from scratch, Django handles routing, database connections, authentication, admin panel — you just build on top of it. Today you install Django, create your first project, understand every file and folder, and run the dev server. This is the foundation — every week from now builds on top of what you set up today.
+
+---
+
+```bash
+# ============================================================
+# CONCEPT 1: INSTALL DJANGO AND CREATE PROJECT
+# ============================================================
+
+# STEP 1 — Make sure venv is activated first
+# (venv) must show in terminal before anything else
+venv\Scripts\activate   # Windows
+source venv/bin/activate # Mac/Linux
+
+# STEP 2 — Install Django
+pip install django
+
+# Confirm installed:
+django-admin --version
+# shows version like 5.0.1
+
+
+# STEP 3 — Create Django project
+django-admin startproject myproject .
+# django-admin = Django's command line tool
+# startproject = command to create new project
+# myproject = name of your project
+# . (dot at end) = create project IN current folder
+# WITHOUT dot: creates extra nested folder — messy
+# WITH dot: cleaner structure — always use the dot
+
+
+# STEP 4 — See what was created
+# Your folder now looks like:
+#
+# backend-dev/
+# ├── venv/
+# ├── manage.py          ← Django's command tool for YOUR project
+# └── myproject/         ← project configuration folder
+#     ├── __init__.py    ← makes this a Python package
+#     ├── settings.py    ← ALL project configuration lives here
+#     ├── urls.py        ← main URL routing — connects URLs to views
+#     ├── wsgi.py        ← used when deploying to production (Render)
+#     └── asgi.py        ← used for async features (ignore for now)
+```
+
+---
+
+```bash
+# ============================================================
+# CONCEPT 2: UNDERSTAND EVERY FILE — NO CONFUSION LATER
+# ============================================================
+
+# manage.py
+# Django's command tool for YOUR project
+# you'll use this EVERY DAY:
+# python manage.py runserver     ← start dev server
+# python manage.py migrate       ← apply database changes
+# python manage.py createsuperuser ← create admin user
+# python manage.py startapp      ← create new app
+# NEVER edit manage.py manually
+
+
+# myproject/settings.py — MOST IMPORTANT FILE
+# controls everything about your project
+# open this file and find these sections:
+
+# SECRET_KEY = long random string — never share this publicly
+# DEBUG = True during development, False in production
+# ALLOWED_HOSTS = [] — empty during dev, add domain in production
+
+# INSTALLED_APPS = [           ← list of active apps in project
+#     'django.contrib.admin',  ← admin panel
+#     'django.contrib.auth',   ← user authentication
+#     'django.contrib.contenttypes',
+#     'django.contrib.sessions',
+#     'django.contrib.messages',
+#     'django.contrib.staticfiles',
+# ]
+# when you create your own apps — you add them here
+
+# DATABASES = {                ← database configuration
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',  ← SQLite by default
+#         'NAME': BASE_DIR / 'db.sqlite3',         ← database file
+#     }
+# }
+# Week 3 Saturday — you change this to PostgreSQL
+
+
+# myproject/urls.py — MAIN URL ROUTING
+# connects incoming URLs to the right view
+# think of it as a traffic director
+# all requests come here first — then forwarded to app's urls.py
+
+
+# myproject/wsgi.py
+# Web Server Gateway Interface
+# used when deploying to Render/production server
+# don't touch this file now
+
+
+# myproject/asgi.py
+# Async version of wsgi
+# used for WebSockets, real-time features
+# ignore completely for now
+```
+
+---
+
+```bash
+# ============================================================
+# CONCEPT 3: RUN THE SERVER
+# ============================================================
+
+# STEP 5 — Run Django development server
+python manage.py runserver
+# starts server on http://127.0.0.1:8000/
+# 127.0.0.1 = localhost = your own computer
+# 8000 = port number
+
+# You'll see output like:
+# Watching for file changes with StatReloader
+# Performing system checks...
+# System check identified no issues (0 silenced).
+# You have 18 unapplied migration(s). ← ignore this warning for now
+# Django version 5.0.1, using settings 'myproject.settings'
+# Starting development server at http://127.0.0.1:8000/
+# Quit the server with CTRL-BREAK.
+
+# Open browser → http://127.0.0.1:8000/
+# You should see Django's default welcome page
+# "The install worked successfully! Congratulations!"
+# Green rocket image = Django is running correctly
+
+# CTRL+C = stop the server
+```
+
+---
+
+```bash
+# ============================================================
+# CONCEPT 4: FIRST MIGRATION — IMPORTANT STEP
+# ============================================================
+
+# Stop server first (CTRL+C)
+# Run this command:
+python manage.py migrate
+# Django comes with built-in tables (users, sessions, admin)
+# migrate = creates these tables in SQLite database
+# you'll see output like:
+# Applying contenttypes.0001_initial... OK
+# Applying auth.0001_initial... OK
+# Applying admin.0001_initial... OK
+# ...
+
+# After migrate — that "18 unapplied migrations" warning disappears
+# db.sqlite3 file is created in your folder
+# this is your database file (SQLite — temporary, replace with PostgreSQL Saturday)
+
+# Run server again:
+python manage.py runserver
+# no more migration warnings
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 5: settings.py — KEY SECTIONS TO KNOW NOW
+# ============================================================
+
+# Open myproject/settings.py and understand these:
+
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+# BASE_DIR = root folder of your project
+# used to build paths to other files
+
+SECRET_KEY = 'django-insecure-...'
+# random secret key — used for security (sessions, CSRF)
+# NEVER push this to GitHub as-is
+# Week 5 — you move this to .env file
+
+DEBUG = True
+# True = shows detailed error pages during development
+# False = hides errors in production (security)
+# ALWAYS False when deploying
+
+ALLOWED_HOSTS = []
+# empty = only localhost allowed
+# in production: ['yourdomain.com', 'yourapp.onrender.com']
+
+INSTALLED_APPS = [
+    'django.contrib.admin',       # admin panel at /admin/
+    'django.contrib.auth',        # login, logout, users
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles', # CSS, JS, images
+]
+# you add your own apps here later:
+# 'blog',
+# 'rest_framework',
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+# SQLite = simple file-based database
+# fine for development, not for production
+# Saturday = switch to PostgreSQL
+
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'Asia/Kolkata'
+# change to your timezone — important for timestamps in database
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — BIG PICTURE
+# ============================================================
+
+# HOW A REQUEST WORKS IN DJANGO:
+#
+# Browser/Postman sends request
+#         ↓
+# urls.py (main) — which app handles this?
+#         ↓
+# urls.py (app) — which view handles this?
+#         ↓
+# views.py — run the logic
+#         ↓
+# models.py — get data from database if needed
+#         ↓
+# views.py — send response back
+#         ↓
+# Browser/Postman receives response
+#
+# Today you set up the foundation
+# Tomorrow (D2) — you create first app + first view + first URL
+# This flow becomes completely clear by end of Week 3
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Answer these without looking at notes:
+- What command creates a Django project?
+- What is the difference between `django-admin` and `manage.py`?
+- What does the `.` (dot) do in `django-admin startproject myproject .`?
+- What command starts the dev server?
+- What command applies database migrations?
+
+**Q2:** Open your `settings.py` and answer:
+- What is `BASE_DIR`?
+- What is `SECRET_KEY` used for?
+- What is `DEBUG = True` and when should it be `False`?
+- What is `INSTALLED_APPS`?
+- What database is Django using by default?
+
+**Q3:** What is wrong with this setup and why?
+```bash
+django-admin startproject myproject
+cd myproject
+python manage.py runserver
+```
+Hint: look at the folder structure this creates vs using the dot.
+
+---
+
+Say "Revision Notes W3 D1" for revision or "W3 D2" to continue.
