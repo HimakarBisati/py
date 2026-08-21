@@ -1,0 +1,300 @@
+**W2-D5-Error_Handling**
+
+---
+
+**What and Why:**
+Real backend APIs crash constantly without error handling — bad input, missing data, database failures, network issues. Without `try/except` one bad request crashes your entire API. With it, you catch the error, return a proper response, and keep the API running. Every Django view you write in Week 4 will have error handling — if something goes wrong, return a JSON error response, not a crash.
+
+---
+
+```python
+# ============================================================
+# CONCEPT 1: try / except / finally — BASIC STRUCTURE
+# ============================================================
+
+def divide(a, b):
+    try:
+        result = a / b
+        # RISKY CODE goes inside try block
+        # if this line raises any error — Python jumps to except immediately
+        # code below the error line inside try = never runs
+        print(f"Result: {result}")
+
+    except ZeroDivisionError:
+        # catches ONLY ZeroDivisionError
+        # runs when b = 0
+        # program doesn't crash — handles gracefully
+        print("Error: Cannot divide by zero")
+
+    except TypeError:
+        # catches ONLY TypeError
+        # runs when wrong data type passed — e.g. string instead of number
+        print("Error: Invalid input type — numbers only")
+
+    finally:
+        # ALWAYS runs — whether try succeeded, except ran, or anything happened
+        # use for cleanup: closing files, database connections, logging
+        print("Division attempt finished")
+        # this line runs every single time no matter what
+
+
+divide(10, 2)
+# Result: 5.0
+# Division attempt finished
+
+divide(10, 0)
+# Error: Cannot divide by zero
+# Division attempt finished
+
+divide(10, "two")
+# Error: Invalid input type — numbers only
+# Division attempt finished
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 2: raise — TRIGGER YOUR OWN ERROR
+# ============================================================
+
+def get_user_age(age):
+    try:
+        if age < 0:
+            raise ValueError("Age cannot be negative")
+            # raise = trigger error yourself on purpose
+            # age = -5 is valid Python — no automatic crash
+            # but makes no sense in your app — so YOU raise the error
+            # raise stops execution here, jumps to except immediately
+
+        if age > 150:
+            raise ValueError("Age cannot be more than 150")
+            # another logical validation — your rules, not Python's
+
+        print(f"Age accepted: {age}")
+
+    except ValueError as e:
+        # 'as e' = captures the error object
+        # e contains the message you passed to ValueError()
+        print(f"Error: {e}")
+        # Error: Age cannot be negative
+
+
+get_user_age(25)    # Age accepted: 25
+get_user_age(-5)    # Error: Age cannot be negative
+get_user_age(200)   # Error: Age cannot be more than 150
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 3: MULTIPLE EXCEPT BLOCKS + GENERIC EXCEPTION
+# ============================================================
+
+def safe_divide_input(a, b):
+    try:
+        result = a / b
+        return result
+
+    except ZeroDivisionError:
+        # most specific error — check first
+        print("Cannot divide by zero")
+        return None
+
+    except TypeError:
+        # another specific error — check second
+        print("Invalid input type")
+        return None
+
+    except Exception as e:
+        # GENERIC — catches ANY other error not caught above
+        # always put this LAST — most specific first, generic last
+        # if put first — catches everything, specific blocks never run
+        print(f"Unexpected error: {e}")
+        return None
+
+    finally:
+        print("Operation complete")
+        # always runs — success or failure
+
+
+print(safe_divide_input(10, 2))    # 5.0 → Operation complete
+print(safe_divide_input(10, 0))    # None → Operation complete
+print(safe_divide_input(10, "x"))  # None → Operation complete
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 4: COMMON ERRORS TO KNOW
+# ============================================================
+
+# ZeroDivisionError — dividing by zero
+result = 10 / 0
+
+# TypeError — wrong data type
+result = "hello" + 5
+
+# ValueError — right type, wrong value
+number = int("abc")  # "abc" can't convert to int
+
+# IndexError — list index doesn't exist
+my_list = [1, 2, 3]
+print(my_list[10])  # index 10 doesn't exist
+
+# KeyError — dictionary key doesn't exist
+my_dict = {"name": "Ravi"}
+print(my_dict["age"])  # "age" key doesn't exist
+
+# AttributeError — attribute doesn't exist on object
+class Car:
+    def __init__(self):
+        self.brand = "Toyota"
+
+c = Car()
+print(c.color)  # 'color' attribute doesn't exist
+
+
+# HANDLING EACH:
+def safe_operations():
+    try:
+        my_list = [1, 2, 3]
+        print(my_list[10])          # IndexError
+
+    except IndexError:
+        print("Index out of range")
+
+    try:
+        my_dict = {"name": "Ravi"}
+        print(my_dict["age"])       # KeyError
+
+    except KeyError:
+        print("Key not found")
+
+    try:
+        number = int("abc")         # ValueError
+
+    except ValueError:
+        print("Cannot convert to integer")
+
+safe_operations()
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 5: CUSTOM EXCEPTION CLASS
+# ============================================================
+
+class InvalidSalaryError(Exception):
+    # creating own custom exception
+    # inherits from Exception — base class for all errors
+    # use when built-in errors don't describe your specific problem clearly
+    pass
+
+class InvalidAgeError(Exception):
+    pass
+
+
+def create_employee(name, salary, age):
+    try:
+        if salary <= 0:
+            raise InvalidSalaryError("Salary must be positive")
+            # raise your own custom exception — very clear error message
+
+        if age < 18:
+            raise InvalidAgeError("Employee must be 18 or older")
+
+        print(f"Employee {name} created successfully")
+
+    except InvalidSalaryError as e:
+        print(f"Salary Error: {e}")
+
+    except InvalidAgeError as e:
+        print(f"Age Error: {e}")
+
+
+create_employee("Ravi", 30000, 25)   # Employee Ravi created successfully
+create_employee("Sai", -5000, 25)    # Salary Error: Salary must be positive
+create_employee("Kiran", 20000, 16)  # Age Error: Employee must be 18 or older
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — HOW THIS LOOKS IN REAL PROJECT
+# ============================================================
+
+# In your AI Job Portal (Week 4), every view will look like:
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+class JobCreateView(APIView):
+    def post(self, request):
+        try:
+            title = request.data["title"]
+            # KeyError if "title" not in request — caught below
+
+            salary = int(request.data["salary"])
+            # ValueError if salary not a number — caught below
+
+            if salary <= 0:
+                raise ValueError("Salary must be positive")
+                # your own validation — same as raise in Employee example
+
+            job = Job.objects.create(title=title, salary=salary)
+            return Response({"message": "Job created"}, status=201)
+
+        except KeyError as e:
+            return Response({"error": f"Missing field: {e}"}, status=400)
+            # missing required field — return proper error response
+
+        except ValueError as e:
+            return Response({"error": str(e)}, status=400)
+            # invalid value — return proper error response
+
+        except Exception as e:
+            return Response({"error": "Something went wrong"}, status=500)
+            # unexpected error — return 500 server error
+
+# try/except in views = API never crashes on bad input
+# always returns proper JSON error response instead
+# this is exactly how production backend APIs work
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Write a function `safe_list_access(my_list, index)` that:
+- Returns `my_list[index]` if index exists
+- Catches `IndexError` and prints "Index out of range"
+- Catches `TypeError` if index is not an integer
+- Returns `None` on any error
+Test with valid index, invalid index, and string index.
+
+**Q2:** Write a function `safe_convert(value, convert_to)` that:
+- Converts `value` to `int`, `float`, or `str` based on `convert_to`
+- Raises `ValueError` if `convert_to` is not one of these three
+- Catches `ValueError` if conversion fails
+- Uses `finally` to print "Conversion attempt done"
+Test with valid and invalid conversions.
+
+**Q3:** Create custom exceptions `InvalidEmailError` and `InvalidPasswordError`. Write a function `register_user(email, password)` that:
+- Raises `InvalidEmailError` if "@" not in email
+- Raises `InvalidPasswordError` if `len(password) < 8`
+- Prints "User registered successfully" if both valid
+- Catches both custom exceptions separately with clear messages
+Test with valid and invalid inputs.
+
+---
+
+Say "Revision Notes W2 D5" for revision or "W2 D6" to continue.
