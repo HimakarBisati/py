@@ -1,0 +1,92 @@
+**W2-D4-Revision-Polymorphism_Shape**
+
+---
+
+```
+KEY POINTS:
+- polymorphism = same method name, different behaviour per object
+- loop through different objects, call same method = polymorphism
+- no if/else needed — each class handles its own behaviour
+- type(obj).__name__ = gets class name as string
+- forgetting to override = silent bug — returns parent default, no crash
+- NotImplementedError = forces children to implement method
+- isinstance(obj, Class) = check if object is instance of class
+- Django .save() = overridden differently per model — polymorphism
+- super().save() = call parent's save after own logic
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+class Shape:
+    def area(self):
+        raise NotImplementedError("Must implement area()")
+
+    def perimeter(self):
+        raise NotImplementedError("Must implement perimeter()")
+
+
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+
+    def area(self):
+        return 3.14 * self.radius * self.radius
+
+    def perimeter(self):
+        return 2 * 3.14 * self.radius
+
+
+class Square(Shape):
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        return self.side * self.side
+
+    def perimeter(self):
+        return 4 * self.side
+
+
+class Rectangle(Shape):
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+    def area(self):
+        return self.width * self.height
+
+    def perimeter(self):
+        return 2 * (self.width + self.height)
+
+
+# polymorphism in loop
+shapes = [Circle(5), Square(4), Rectangle(3, 6)]
+
+for shape in shapes:
+    print(f"{type(shape).__name__}")
+    print(f"  Area: {shape.area()}")
+    print(f"  Perimeter: {shape.perimeter()}")
+
+# isinstance check
+c = Circle(5)
+print(isinstance(c, Circle))  # True
+print(isinstance(c, Shape))   # True
+print(isinstance(c, Square))  # False
+```
+
+---
+
+```
+DJANGO CONNECTION:
+Post.save() overrides parent save() = Circle overrides Shape area()
+super().save() = calls parent save after own logic
+same .save() on any model = polymorphism
+JobApplication.save() → AI score, Job.save() → validate salary
+```
+
+---
+
+Say "W2 D5" when ready.
