@@ -1,0 +1,287 @@
+**W3-D2-Apps_and_URLs**
+
+---
+
+**What and Why:**
+Django projects are split into apps — each app handles one specific feature. Your AI Job Portal will have separate apps for `users`, `jobs`, `applications`. Today you create your first app, write your first view (the function that handles a request and returns a response), and connect it to a URL. By end of today you'll see your own output in the browser — first real working Django code.
+
+---
+
+```bash
+# ============================================================
+# CONCEPT 1: CREATE AN APP
+# ============================================================
+
+# Make sure server is stopped (CTRL+C) and venv is active
+
+python manage.py startapp blog
+# startapp = creates new app called 'blog'
+# creates this folder structure:
+
+# blog/
+# ├── __init__.py      ← makes blog a Python package
+# ├── admin.py         ← register models for admin panel
+# ├── apps.py          ← app configuration (don't touch now)
+# ├── models.py        ← database tables go here
+# ├── tests.py         ← automated tests (ignore for now)
+# ├── views.py         ← YOUR LOGIC GOES HERE — handles requests
+# └── migrations/      ← database migration files (auto-generated)
+#     └── __init__.py
+
+
+# STEP 2 — Register app in settings.py
+# Open myproject/settings.py
+# Find INSTALLED_APPS and add 'blog':
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'blog',   # ← ADD YOUR APP HERE
+    # if you forget this — Django ignores your app completely
+    # models won't migrate, app won't work
+]
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 2: WRITE YOUR FIRST VIEW
+# ============================================================
+
+# Open blog/views.py and write this:
+
+from django.http import HttpResponse
+# HttpResponse = Django class that creates HTTP response
+# every view MUST return a response — Django requires this
+
+
+def hello_view(request):
+    # VIEW = function that handles one specific HTTP request
+    # request = object containing everything about incoming request
+    #   request.method = "GET", "POST", "PUT", "DELETE"
+    #   request.data = data sent in request body (POST/PUT)
+    #   request.user = who made the request
+    # every view takes 'request' as first parameter — always
+
+    return HttpResponse("Hello World")
+    # HttpResponse = simplest response
+    # sends plain text "Hello World" back to browser
+    # later you'll return JSON instead of plain text
+    # that's what DRF (Week 4) adds on top of this
+
+
+def about_view(request):
+    return HttpResponse("This is the about page")
+    # another view — handles /blog/about/ URL
+
+
+def greet_view(request, name):
+    # name = URL parameter — value comes from URL itself
+    # e.g. /blog/greet/Ravi/ → name = "Ravi"
+    return HttpResponse(f"Hello {name}! Welcome to our blog.")
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 3: CREATE APP-LEVEL urls.py
+# ============================================================
+
+# blog/urls.py — CREATE THIS FILE YOURSELF (doesn't exist by default)
+# right click blog folder → new file → urls.py
+
+from django.urls import path
+from . import views
+# . = current package (blog app)
+# import views = import blog/views.py
+
+urlpatterns = [
+    path('hello/', views.hello_view),
+    # path() = connects a URL pattern to a view function
+    # 'hello/' = URL pattern — matches /blog/hello/
+    # views.hello_view = view function to run when URL matches
+    # NO () at end of hello_view — passing function, not calling it
+
+    path('about/', views.about_view),
+    # /blog/about/ → runs about_view
+
+    path('greet/<str:name>/', views.greet_view),
+    # <str:name> = URL parameter — captures string from URL
+    # /blog/greet/Ravi/ → name = "Ravi" → passed to greet_view
+    # str = data type (string), name = variable name
+]
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 4: CONNECT TO MAIN urls.py
+# ============================================================
+
+# Open myproject/urls.py — this is the MAIN url file
+# By default it looks like:
+
+from django.contrib import admin
+from django.urls import path
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+]
+
+# ADD your blog app URLs:
+
+from django.contrib import admin
+from django.urls import path, include
+# include = includes another urls.py file
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('blog/', include('blog.urls')),
+    # 'blog/' = URL prefix for all blog app URLs
+    # include('blog.urls') = forward to blog/urls.py
+    # any URL starting with 'blog/' goes to blog app
+    # blog/urls.py then decides which view handles it
+
+    # HOW IT WORKS:
+    # request comes to /blog/hello/
+    # main urls.py sees 'blog/' prefix → forwards to blog.urls
+    # blog/urls.py sees 'hello/' → runs hello_view
+    # hello_view returns HttpResponse("Hello World")
+    # browser shows "Hello World"
+]
+```
+
+---
+
+```bash
+# ============================================================
+# CONCEPT 5: TEST IN BROWSER
+# ============================================================
+
+# Start server:
+python manage.py runserver
+
+# Open browser and visit:
+# http://127.0.0.1:8000/blog/hello/
+# → should show: Hello World
+
+# http://127.0.0.1:8000/blog/about/
+# → should show: This is the about page
+
+# http://127.0.0.1:8000/blog/greet/Ravi/
+# → should show: Hello Ravi! Welcome to our blog.
+
+# http://127.0.0.1:8000/blog/greet/Vijay/
+# → should show: Hello Vijay! Welcome to our blog.
+# same URL pattern, different name = different output
+
+# http://127.0.0.1:8000/admin/
+# → Django admin login page (always available)
+
+# COMMON ERRORS:
+# 404 Not Found = URL not connected correctly — check urls.py
+# 500 Server Error = error in your view code — check views.py
+# ImportError = wrong import — check spelling
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 6: HOW REQUEST-RESPONSE CYCLE WORKS
+# ============================================================
+
+# FULL FLOW for /blog/hello/ request:
+
+# 1. Browser sends GET request to http://127.0.0.1:8000/blog/hello/
+
+# 2. Django receives request in myproject/urls.py
+#    sees 'blog/' prefix → forwards to blog/urls.py
+
+# 3. blog/urls.py sees 'hello/' → calls hello_view(request)
+
+# 4. hello_view runs:
+def hello_view(request):
+    return HttpResponse("Hello World")
+    # creates HttpResponse object with "Hello World"
+    # returns it to Django
+
+# 5. Django sends HttpResponse back to browser
+
+# 6. Browser displays "Hello World"
+
+# request object contains:
+print(request.method)   # "GET" — type of request
+print(request.path)     # "/blog/hello/" — URL path
+print(request.GET)      # query parameters from URL
+# ?name=Ravi → request.GET = {'name': 'Ravi'}
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — AI JOB PORTAL PREVIEW
+# ============================================================
+
+# In your AI Job Portal (Week 7), your views will look like:
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class JobListView(APIView):
+    # class-based view — inherits from APIView (Week 4)
+    # same concept as today but more powerful
+
+    def get(self, request):
+        # handles GET /jobs/ — returns list of all jobs
+        return Response({"message": "List of all jobs"})
+
+    def post(self, request):
+        # handles POST /jobs/ — creates new job
+        return Response({"message": "Job created"})
+
+# today's hello_view → Week 4's JobListView
+# HttpResponse → Response (JSON)
+# function view → class-based view
+# same concept, more powerful version
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Create a new app called `products`. Register it in settings.py. Write these views in `products/views.py`:
+- `product_list(request)` → returns "List of all products"
+- `product_detail(request, product_id)` → returns f"Product details for ID: {product_id}"
+- `search_product(request, name)` → returns f"Searching for: {name}"
+Connect all three to URLs in `products/urls.py` and include in main `urls.py`.
+Test all three in browser.
+
+**Q2:** Add a view `welcome_view(request)` to blog app that returns different messages based on request method:
+```python
+if request.method == "GET":
+    return HttpResponse("Welcome! This is a GET request")
+else:
+    return HttpResponse("This is not a GET request")
+```
+Connect to URL `/blog/welcome/` and test in browser.
+
+**Q3:** Answer without looking at notes:
+- What is the difference between `myproject/urls.py` and `blog/urls.py`?
+- What does `include('blog.urls')` do?
+- Why do we write `views.hello_view` without `()` in urls.py?
+- What is the `request` parameter in a view function?
+
+---
+
+Say "Revision Notes W3 D2" for revision or "W3 D3" to continue.
