@@ -1,0 +1,302 @@
+**W3-D3-Models**
+
+---
+
+**What and Why:**
+Model = database table defined as a Python class. Instead of writing raw SQL to create tables, Django lets you write Python classes — Django converts them to actual database tables automatically. This is the core of Django — your entire AI Job Portal and SaaS Expense Manager are built on models. Get this solid — every project feature starts with a model.
+
+---
+
+```python
+# ============================================================
+# CONCEPT 1: CREATE YOUR FIRST MODEL
+# ============================================================
+
+# Open blog/models.py and write this:
+
+from django.db import models
+# models = Django's module containing all field types
+
+
+class Post(models.Model):
+    # Post inherits from models.Model
+    # models.Model = Django's base class for all database tables
+    # class Post = one database table called 'blog_post'
+    # Django automatically adds 'blog_' prefix + app name
+
+    title = models.CharField(max_length=200)
+    # CharField = short text field (like VARCHAR in SQL)
+    # max_length=200 = maximum 200 characters allowed
+    # required — CharField must have max_length
+
+    content = models.TextField()
+    # TextField = long text field (like TEXT in SQL)
+    # no max_length needed — stores unlimited text
+    # use for blog content, descriptions, long text
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    # DateTimeField = stores date + time
+    # auto_now_add=True = automatically saves current date/time
+    # when object is CREATED — never changes after that
+    # you never set this manually — Django handles it
+
+    updated_at = models.DateTimeField(auto_now=True)
+    # auto_now=True = automatically updates to current date/time
+    # every time object is SAVED/UPDATED
+    # different from auto_now_add — updates every save
+
+    is_published = models.BooleanField(default=False)
+    # BooleanField = True or False only
+    # default=False = every new post starts as unpublished
+    # you set to True when ready to publish
+
+    def __str__(self):
+        return self.title
+        # controls how Post object shows in admin panel and shell
+        # without this: shows <Post object (1)> — useless
+        # with this: shows actual title — "My First Post"
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 2: COMMON DJANGO FIELD TYPES
+# ============================================================
+
+class FieldExamples(models.Model):
+
+    # TEXT FIELDS
+    name = models.CharField(max_length=100)
+    # short text — names, titles, emails
+
+    description = models.TextField()
+    # long text — content, descriptions, notes
+
+    slug = models.SlugField(max_length=100, unique=True)
+    # URL-friendly text — "my-post-title" (no spaces, lowercase)
+    # unique=True = no two rows can have same slug
+
+    # NUMBER FIELDS
+    age = models.IntegerField()
+    # whole numbers — 1, 2, 100, -5
+
+    salary = models.DecimalField(max_digits=10, decimal_places=2)
+    # decimal numbers — 50000.00, 1234.56
+    # max_digits=10 = maximum 10 digits total
+    # decimal_places=2 = 2 digits after decimal point
+
+    price = models.FloatField()
+    # floating point — less precise than DecimalField
+    # use DecimalField for money, FloatField for scientific values
+
+    # DATE/TIME FIELDS
+    birth_date = models.DateField()
+    # date only — 2024-01-15 (no time)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    # date + time — 2024-01-15 10:30:00
+
+    # BOOLEAN FIELD
+    is_active = models.BooleanField(default=True)
+    # True or False only
+
+    # EMAIL FIELD
+    email = models.EmailField(max_length=254, unique=True)
+    # validates email format automatically
+    # unique=True = no duplicate emails
+
+    # FILE/IMAGE FIELDS
+    resume = models.FileField(upload_to='resumes/')
+    # stores file — needed for AI Job Portal (resume upload)
+    # upload_to = subfolder inside MEDIA_ROOT
+
+    profile_picture = models.ImageField(upload_to='profiles/')
+    # stores image file
+    # needs Pillow package: pip install Pillow
+
+    # NULL AND BLANK
+    phone = models.CharField(max_length=15, null=True, blank=True)
+    # null=True = database can store NULL (empty in DB)
+    # blank=True = form validation allows empty value
+    # use both together for optional fields
+```
+
+---
+
+```bash
+# ============================================================
+# CONCEPT 3: MIGRATIONS — TURN MODEL INTO DATABASE TABLE
+# ============================================================
+
+# After writing your model, run these two commands:
+
+# STEP 1:
+python manage.py makemigrations
+# makemigrations = Django reads your models.py
+# creates a migration FILE describing what changed
+# migration file = instructions for database
+# creates: blog/migrations/0001_initial.py
+# you'll see: "Migrations for 'blog': blog/migrations/0001_initial.py - Create model Post"
+
+# STEP 2:
+python manage.py migrate
+# migrate = reads migration file
+# ACTUALLY creates the table in database
+# runs the SQL commands for you
+# you'll see: "Applying blog.0001_initial... OK"
+
+# RULE — always run BOTH in this order, every time you change models.py:
+# 1. python manage.py makemigrations   ← write down the changes
+# 2. python manage.py migrate          ← apply the changes
+
+# What SQL Django runs behind the scenes (you don't write this):
+# CREATE TABLE "blog_post" (
+#     "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+#     "title" varchar(200) NOT NULL,
+#     "content" text NOT NULL,
+#     "created_at" datetime NOT NULL,
+#     "updated_at" datetime NOT NULL,
+#     "is_published" bool NOT NULL
+# );
+# Django adds 'id' field automatically — every model gets auto id
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 4: CHECK DATABASE — DJANGO SHELL
+# ============================================================
+
+# Open Django shell:
+# python manage.py shell
+
+# In shell — test your model:
+from blog.models import Post
+
+# Create a post object and save to database:
+p1 = Post(title="My First Post", content="Hello Django World")
+p1.save()
+# save() = INSERT INTO blog_post (title, content...) in SQL
+# p1.id = 1 (auto-assigned by database)
+# p1.created_at = current datetime (auto-set)
+
+# Shorter way — create AND save in one line:
+p2 = Post.objects.create(title="Second Post", content="Learning Models")
+# .objects.create() = creates object + saves to DB in one step
+
+# Check saved posts:
+print(p1.id)          # 1
+print(p1.title)       # My First Post
+print(p1.created_at)  # 2024-01-15 10:30:00
+
+# Get all posts from database:
+posts = Post.objects.all()
+print(posts)
+# <QuerySet [<Post: My First Post>, <Post: Second Post>]>
+# QuerySet = list of database objects
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 5: COMMON MIGRATION ERRORS AND FIXES
+# ============================================================
+
+# ERROR 1: "No changes detected"
+python manage.py makemigrations
+# Means: Django sees no changes in models.py
+# Fix: make sure you saved models.py, app is in INSTALLED_APPS
+
+# ERROR 2: "Table already exists"
+# Means: migration ran twice
+# Fix: check migration files, delete db.sqlite3 and start fresh if needed
+
+# ERROR 3: "Field does not exist"
+# Means: you're accessing field that wasn't in model when migration ran
+# Fix: add field to model, run makemigrations + migrate again
+
+# ADDING NEW FIELD TO EXISTING MODEL:
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_published = models.BooleanField(default=False)
+    views_count = models.IntegerField(default=0)
+    # added new field — must run makemigrations + migrate again
+    # default=0 required for existing rows that don't have this field yet
+
+# Run:
+# python manage.py makemigrations   ← creates new migration file (0002_...)
+# python manage.py migrate          ← adds column to existing table
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — AI JOB PORTAL MODELS PREVIEW
+# ============================================================
+
+# In your AI Job Portal (Week 7), you will write:
+
+class Job(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    salary = models.DecimalField(max_digits=10, decimal_places=2)
+    location = models.CharField(max_length=100)
+    job_type = models.CharField(max_length=50)  # full-time, part-time
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+class JobApplication(models.Model):
+    resume_score = models.IntegerField(default=0)
+    status = models.CharField(max_length=20, default="pending")
+    applied_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Application {self.id}"
+
+# same exact pattern as Post model today
+# different field names, same concept
+# this is why today matters — Job and JobApplication
+# are just Post with different fields
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Create a new app called `shop`. Register it in settings.py. Create a `Product` model in `shop/models.py` with these fields:
+- `name` — CharField, max 200 chars
+- `description` — TextField
+- `price` — DecimalField, 10 digits, 2 decimal places
+- `stock` — IntegerField, default 0
+- `is_available` — BooleanField, default True
+- `created_at` — DateTimeField, auto set on create
+Add `__str__` returning product name. Run migrations, open shell, create 3 products.
+
+**Q2:** Add these fields to your `Post` model and run migrations again:
+- `views_count` — IntegerField, default 0
+- `author_name` — CharField, max 100 chars, default "Anonymous"
+- `category` — CharField, max 50 chars, blank and null allowed
+What happens to existing posts in database when you add these fields?
+
+**Q3:** Answer without looking at notes:
+- What is the difference between `auto_now_add=True` and `auto_now=True`?
+- What is the difference between `null=True` and `blank=True`?
+- What does `makemigrations` do vs `migrate`?
+- Why does Django automatically add an `id` field?
+- What does `__str__` do in a model?
+
+---
+
+Say "Revision Notes W3 D3" for revision or "W3 D4" to continue.
