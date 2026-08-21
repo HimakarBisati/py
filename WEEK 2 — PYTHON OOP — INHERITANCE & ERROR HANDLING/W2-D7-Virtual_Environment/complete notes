@@ -1,0 +1,267 @@
+**W2-D7-Virtual_Environment**
+
+---
+
+**What and Why:**
+Every Django project needs its own isolated environment. Without venv, all projects share same packages — if Project 1 needs Django 4.0 and Project 2 needs Django 5.0, they conflict and break each other. Venv creates a completely separate Python environment per project — each has its own packages, own versions, no conflicts. This is non-negotiable before starting Django next week.
+
+---
+
+```bash
+# ============================================================
+# CONCEPT 1: CREATE AND ACTIVATE VENV
+# ============================================================
+
+# STEP 1 — Create virtual environment
+# Open terminal, navigate to your project folder first
+# cd Desktop/myproject  (or wherever you want)
+
+python -m venv venv
+# python -m venv = run venv module
+# last 'venv' = name of the folder created
+# creates folder called 'venv' with isolated Python inside
+# you can name it anything but 'venv' is standard convention
+
+
+# STEP 2 — Activate venv
+
+# Windows:
+venv\Scripts\activate
+
+# Mac/Linux:
+source venv/bin/activate
+
+# After activation — you'll see (venv) at start of terminal line:
+# (venv) C:\Users\Vijay\Desktop\myproject>
+# (venv) = confirmation venv is active
+# everything you install now goes INSIDE this venv only
+
+
+# STEP 3 — Confirm venv is active
+where python      # Windows — shows python path inside venv folder
+which python      # Mac/Linux — same
+
+# path should show something like:
+# C:\Users\Vijay\Desktop\myproject\venv\Scripts\python.exe
+# NOT the global Python path
+```
+
+---
+
+```bash
+# ============================================================
+# CONCEPT 2: INSTALL PACKAGES INSIDE VENV
+# ============================================================
+
+# Make sure (venv) shows in terminal before installing anything
+
+pip install django
+# installs Django ONLY inside this venv
+# other projects not affected
+
+pip install djangorestframework
+# install DRF — needed for Week 4
+
+pip install psycopg2-binary
+# PostgreSQL connector — needed for Week 3
+
+# Confirm Django installed:
+django-admin --version
+# shows Django version — e.g. 5.0.1
+# if shows version = installed correctly
+```
+
+---
+
+```bash
+# ============================================================
+# CONCEPT 3: requirements.txt — SAVE AND RESTORE PACKAGES
+# ============================================================
+
+# Save all installed packages to file:
+pip freeze
+# shows list of all installed packages with exact versions:
+# Django==5.0.1
+# djangorestframework==3.14.0
+# psycopg2-binary==2.9.9
+
+pip freeze > requirements.txt
+# > requirements.txt = saves output to file
+# creates requirements.txt in current folder
+# this file goes in GitHub — standard in every real project
+
+# Restore packages from requirements.txt (on new machine or new venv):
+pip install -r requirements.txt
+# -r = read from file
+# installs exact same versions as original project
+# this is how teammates set up your project from GitHub
+```
+
+---
+
+```bash
+# ============================================================
+# CONCEPT 4: DEACTIVATE AND PROOF IT WORKS
+# ============================================================
+
+# Deactivate venv:
+deactivate
+# (venv) disappears from terminal
+# now using global Python — not your project's venv
+
+# Proof venv isolation works:
+django-admin --version
+# ERROR or different version — Django not installed globally
+# proves Django was only inside venv, not system-wide
+
+# Reactivate when needed:
+venv\Scripts\activate    # Windows
+source venv/bin/activate # Mac/Linux
+# (venv) appears again — back inside isolated environment
+```
+
+---
+
+```bash
+# ============================================================
+# CONCEPT 5: FOLDER STRUCTURE AFTER SETUP
+# ============================================================
+
+# myproject/
+# ├── venv/                ← virtual environment folder
+# │   ├── Scripts/         ← activation scripts (Windows)
+# │   ├── Lib/             ← installed packages live here
+# │   └── ...
+# ├── requirements.txt     ← list of installed packages
+# └── .gitignore           ← tells Git to ignore venv folder
+
+# IMPORTANT: NEVER push venv folder to GitHub
+# venv folder = huge (hundreds of MB)
+# requirements.txt = tiny text file with package list
+# anyone cloning your repo runs: pip install -r requirements.txt
+# they get exact same environment without downloading venv
+
+# .gitignore file — create this file and add:
+# venv/
+# __pycache__/
+# *.pyc
+# .env
+# This tells Git to ignore these files/folders
+```
+
+---
+
+```bash
+# ============================================================
+# COMPLETE SETUP — DO THIS NOW FOR YOUR PROJECT
+# ============================================================
+
+# 1. Create project folder
+mkdir backend-dev
+cd backend-dev
+
+# 2. Create venv
+python -m venv venv
+
+# 3. Activate venv
+venv\Scripts\activate          # Windows
+# source venv/bin/activate     # Mac/Linux
+
+# 4. Install required packages
+pip install django
+pip install djangorestframework
+pip install psycopg2-binary
+pip install python-decouple
+pip install celery
+pip install redis
+
+# 5. Save packages list
+pip freeze > requirements.txt
+
+# 6. Confirm everything installed
+django-admin --version
+python -c "import rest_framework; print('DRF installed')"
+
+# 7. Create .gitignore
+# create file called .gitignore and add:
+# venv/
+# __pycache__/
+# *.pyc
+# .env
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — HOW THIS LOOKS IN REAL PROJECT
+# ============================================================
+
+# Your complete project setup from Week 3:
+
+# backend-dev/
+# ├── venv/                    ← never pushed to GitHub
+# ├── requirements.txt         ← always pushed to GitHub
+# ├── .gitignore               ← always pushed to GitHub
+# ├── .env                     ← never pushed (contains secrets)
+# ├── manage.py                ← Django's command tool
+# └── myproject/               ← Django project folder
+#     ├── settings.py
+#     ├── urls.py
+#     └── wsgi.py
+
+# requirements.txt for your AI Job Portal will contain:
+# Django==5.0.1
+# djangorestframework==3.14.0
+# psycopg2-binary==2.9.9
+# python-decouple==3.8
+# celery==5.3.4
+# redis==5.0.1
+# openai==1.3.0
+# gunicorn==21.2.0   ← for deployment on Render
+
+# Anyone cloning your project from GitHub:
+# git clone your-repo-url
+# cd your-repo
+# python -m venv venv
+# venv\Scripts\activate
+# pip install -r requirements.txt
+# python manage.py runserver
+# Done — exact same environment
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Do this in your terminal right now:
+- Create a folder called `django-practice`
+- Navigate into it
+- Create a venv called `venv`
+- Activate it — confirm `(venv)` shows
+- Install Django and DRF
+- Run `pip freeze > requirements.txt`
+- Open requirements.txt and paste the contents here
+
+**Q2:** Answer these without looking at notes:
+- What command creates a venv?
+- What command activates on Windows?
+- What command saves installed packages to file?
+- What command installs all packages from requirements.txt?
+- Why should you never push venv folder to GitHub?
+
+**Q3:** What is wrong with this workflow and why?
+```
+1. Create project folder
+2. pip install django
+3. pip install djangorestframework
+4. python -m venv venv
+5. venv\Scripts\activate
+6. Start coding Django
+```
+
+---
+
+Say "Revision Notes W2 D7" for revision or "W3 D1" to start Django.
