@@ -1,0 +1,231 @@
+**W2-D4-Polymorphism_Shape**
+
+---
+
+**What and Why:**
+Polymorphism = same method name, different behaviour depending on which object calls it. You already saw this in Inheritance (Day 1) — `sound()` behaved differently per animal. Today you go deeper — looping through different objects calling same method, and understanding why this is powerful in real backend code. Django's `.save()`, `.delete()`, `.validate()` work this way — same method name, each model handles it differently.
+
+---
+
+```python
+# ============================================================
+# CONCEPT 1: POLYMORPHISM — SAME METHOD, DIFFERENT BEHAVIOUR
+# ============================================================
+
+class Shape:  # PARENT CLASS
+    def area(self):
+        return 0
+        # default area — returns 0
+        # child classes override with their own correct formula
+        # if child forgets to override — returns 0 silently (dangerous bug)
+
+    def perimeter(self):
+        return 0
+        # same pattern for perimeter
+
+
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+
+    def area(self):
+        return 3.14 * self.radius * self.radius
+        # pi * r * r = circle area formula
+        # self.radius = value saved in __init__
+
+    def perimeter(self):
+        return 2 * 3.14 * self.radius
+        # 2 * pi * r = circumference of circle
+
+
+class Square(Shape):
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        return self.side * self.side
+        # side * side = square area
+
+    def perimeter(self):
+        return 4 * self.side
+        # 4 * side = square perimeter
+
+
+class Rectangle(Shape):
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+    def area(self):
+        return self.width * self.height
+        # width * height = rectangle area
+
+    def perimeter(self):
+        return 2 * (self.width + self.height)
+        # 2 * (width + height) = rectangle perimeter
+
+
+class Triangle(Shape):
+    def __init__(self, base, height, side1, side2, side3):
+        self.base = base
+        self.height = height
+        self.side1 = side1
+        self.side2 = side2
+        self.side3 = side3
+
+    def area(self):
+        return 0.5 * self.base * self.height
+        # 0.5 * base * height = triangle area
+
+    def perimeter(self):
+        return self.side1 + self.side2 + self.side3
+        # sum of all three sides
+
+
+# ============================================================
+# CONCEPT 2: POLYMORPHISM IN LOOP — THE REAL POWER
+# ============================================================
+
+shapes = [
+    Circle(5),
+    Square(4),
+    Rectangle(3, 6),
+    Triangle(4, 3, 3, 4, 5)
+]
+
+for shape in shapes:
+    print(f"{type(shape).__name__}")
+    # type(shape) = class of this object (Circle, Square etc)
+    # .__name__ = gets class name as string "Circle", "Square" etc
+    print(f"  Area: {shape.area()}")
+    print(f"  Perimeter: {shape.perimeter()}")
+    # same .area() and .perimeter() called on every object
+    # each object handles it differently — polymorphism in action
+    # no if/else needed — each class knows its own formula
+
+# Circle
+#   Area: 78.5
+#   Perimeter: 31.400000000000002
+# Square
+#   Area: 16
+#   Perimeter: 16
+# Rectangle
+#   Area: 18
+#   Perimeter: 18
+# Triangle
+#   Area: 6.0
+#   Perimeter: 12
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 3: DANGEROUS SILENT BUG — FORGETTING TO OVERRIDE
+# ============================================================
+
+class Hexagon(Shape):
+    def __init__(self, side):
+        self.side = side
+    # forgot to override area() and perimeter()
+
+h = Hexagon(5)
+print(h.area())       # 0 — uses parent's default, not correct
+print(h.perimeter())  # 0 — wrong answer, NO crash
+# this is a silent bug — most dangerous kind
+# always override both methods in every child
+# or add a check in parent to force children to implement:
+
+class ShapeStrict:
+    def area(self):
+        raise NotImplementedError("Every shape must implement area()")
+        # raise NotImplementedError = forces child to override
+        # if child forgets — crash with clear error message
+        # better than silently returning 0
+
+    def perimeter(self):
+        raise NotImplementedError("Every shape must implement perimeter()")
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 4: isinstance() — CHECK OBJECT TYPE
+# ============================================================
+
+c = Circle(5)
+s = Square(4)
+
+print(isinstance(c, Circle))   # True — c is a Circle object
+print(isinstance(c, Shape))    # True — c is also a Shape (parent)
+print(isinstance(c, Square))   # False — c is not a Square
+print(isinstance(s, Shape))    # True — s is also a Shape
+
+# isinstance() used in Django views to check object types
+# useful when you need different behaviour based on object type
+# but usually polymorphism removes the need for isinstance()
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — HOW THIS LOOKS IN REAL PROJECT
+# ============================================================
+
+# Django uses polymorphism everywhere:
+
+class Post(models.Model):
+    def save(self, *args, **kwargs):
+        # overriding Django's parent save() method
+        # same as Circle overriding Shape's area()
+        self.title = self.title.upper()  # custom logic before saving
+        super().save(*args, **kwargs)    # then call parent's save()
+
+class Comment(models.Model):
+    def save(self, *args, **kwargs):
+        # Comment also overrides save() — different behaviour
+        self.content = self.content.strip()  # remove whitespace
+        super().save(*args, **kwargs)
+
+# Post.save() and Comment.save() = same method name
+# each model handles it differently — polymorphism
+# Django calls .save() the same way on any model
+# each model does its own thing — exactly like shapes and area()
+
+# In your AI Job Portal:
+# JobApplication.save() → calculate AI score before saving
+# Job.save() → validate salary before saving
+# User.save() → hash password before saving
+# same .save() call, completely different behaviour per model
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Create a `Payment` parent class with method `process()` that raises `NotImplementedError`. Create 3 children:
+- `CreditCard(amount, card_number)` — `process()` prints "Processing credit card payment of {amount}"
+- `UPI(amount, upi_id)` — `process()` prints "Processing UPI payment of {amount} to {upi_id}"
+- `Cash(amount)` — `process()` prints "Processing cash payment of {amount}"
+
+Create a list of all 3 payment objects, loop through and call `process()` on each — show polymorphism.
+
+**Q2:** Add `validate()` method to each Payment child:
+- `CreditCard.validate()` → True if `len(card_number) == 16`
+- `UPI.validate()` → True if "@" in `upi_id`
+- `Cash.validate()` → True if `amount > 0`
+Before processing each payment, validate first — only process if valid.
+
+**Q3:** Create an `Employee` parent with method `calculate_salary()` raising `NotImplementedError`. Create children:
+- `FullTime(name, monthly_salary)` → `calculate_salary()` returns `monthly_salary`
+- `PartTime(name, hourly_rate, hours_worked)` → returns `hourly_rate * hours_worked`
+- `Freelancer(name, project_fee, tax_rate)` → returns `project_fee - (project_fee * tax_rate / 100)`
+Loop through all employees, print name and calculated salary.
+
+---
+
+Say "Revision Notes W2 D4" for revision or "W2 D5" to continue.
