@@ -1,0 +1,106 @@
+**W2-D6-Revision-Modules_and_Packages**
+
+---
+
+```
+KEY POINTS:
+- module = one .py file
+- package = folder of modules with __init__.py inside
+- from shapes import Circle = import specific thing
+- import shapes = import whole module, access with shapes.Circle
+- import shapes as sh = import with alias
+- from shapes import * = imports everything (avoid this)
+- __init__.py = empty file that makes folder a package
+- if __name__ == "__main__" = runs only when file executed directly
+- skipped when file is imported from another file
+- pip install = installs external packages
+- pip freeze > requirements.txt = saves installed packages list
+- Django app = package (folder with __init__.py)
+- models.py, views.py, urls.py = modules inside Django app package
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+# shapes.py (module)
+class Circle:
+    def __init__(self, radius):
+        self.radius = radius
+
+    def area(self):
+        return 3.14 * self.radius * self.radius
+
+def greet():
+    print("Hello from shapes module")
+
+PI = 3.14159
+
+if __name__ == "__main__":
+    c = Circle(5)
+    print(c.area())  # runs only when shapes.py run directly
+
+
+# main.py (importing from module)
+from shapes import Circle, greet    # import specific
+import shapes                       # import whole module
+import shapes as sh                 # import with alias
+
+c1 = Circle(5)
+print(c1.area())     # 78.5
+greet()              # Hello from shapes module
+
+c2 = shapes.Circle(3)
+print(shapes.PI)     # 3.14159
+
+c3 = sh.Circle(7)
+print(c3.area())     # 153.86
+
+
+# package structure
+# utils/
+# ├── __init__.py      ← empty, makes folder a package
+# ├── helpers.py
+# └── validators.py
+
+# utils/helpers.py
+def square(n): return n * n
+def cube(n): return n * n * n
+
+# utils/validators.py
+def is_valid_email(email): return "@" in email and "." in email
+def is_valid_salary(salary): return salary > 0
+
+# main.py
+from utils.helpers import square, cube
+from utils.validators import is_valid_email
+
+print(square(5))                      # 25
+print(is_valid_email("r@gmail.com"))  # True
+
+
+# pip commands
+# pip install requests
+# pip freeze > requirements.txt
+# pip install -r requirements.txt
+
+import requests
+response = requests.get("https://api.github.com")
+print(response.status_code)  # 200
+print(response.json())       # response as dictionary
+```
+
+---
+
+```
+DJANGO CONNECTION:
+blog/ = package (Django app)
+models.py, views.py, urls.py = modules inside package
+from .models import Post = importing from same package
+from django.contrib.auth.models import User = importing from Django package
+```
+
+---
+
+Say "W2 D7" when ready.
