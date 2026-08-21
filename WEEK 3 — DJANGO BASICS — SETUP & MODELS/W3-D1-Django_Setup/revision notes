@@ -1,0 +1,84 @@
+**W3-D1-Revision-Django_Setup**
+
+---
+
+```
+KEY POINTS:
+- Django = Python web framework — builds backend APIs fast
+- always activate venv BEFORE installing Django
+- django-admin startproject myproject . (dot = create in current folder)
+- without dot = creates extra nested folder — messy
+- manage.py = Django's command tool for YOUR project
+- settings.py = ALL project configuration lives here
+- urls.py = main URL routing — traffic director
+- wsgi.py = used for production deployment
+- python manage.py runserver = start dev server at localhost:8000
+- python manage.py migrate = apply database changes
+- DEBUG = True during dev, False in production
+- SECRET_KEY = never push to GitHub as-is
+- INSTALLED_APPS = list of active apps in project
+- SQLite = default database, replace with PostgreSQL Saturday
+- TIME_ZONE = 'Asia/Kolkata' — change to your timezone
+```
+
+---
+
+```bash
+# QUICK REFERENCE — ALL COMMANDS
+
+# Activate venv first
+venv\Scripts\activate          # Windows
+source venv/bin/activate       # Mac/Linux
+
+# Install Django
+pip install django
+
+# Confirm installed
+django-admin --version
+
+# Create project (dot = current folder)
+django-admin startproject myproject .
+
+# Apply migrations
+python manage.py migrate
+
+# Start server
+python manage.py runserver
+# opens at http://127.0.0.1:8000/
+
+# Stop server
+# CTRL+C
+```
+
+---
+
+```
+PROJECT STRUCTURE:
+backend-dev/
+├── venv/
+├── manage.py          ← use this daily
+└── myproject/
+    ├── settings.py    ← most important file
+    ├── urls.py        ← main URL routing
+    ├── wsgi.py        ← production deployment
+    └── asgi.py        ← ignore for now
+
+SETTINGS.PY KEY SECTIONS:
+SECRET_KEY = never share publicly
+DEBUG = True (dev) / False (production)
+ALLOWED_HOSTS = [] (dev) / ['yourdomain.com'] (production)
+INSTALLED_APPS = list of active apps
+DATABASES = SQLite now, PostgreSQL Saturday
+TIME_ZONE = 'Asia/Kolkata'
+```
+
+---
+
+```
+REQUEST FLOW IN DJANGO:
+Browser → urls.py (main) → urls.py (app) → views.py → models.py → response
+```
+
+---
+
+Say "W3 D2" when ready.
