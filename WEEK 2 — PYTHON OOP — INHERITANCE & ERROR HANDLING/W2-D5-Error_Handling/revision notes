@@ -1,0 +1,108 @@
+**W2-D5-Revision-Error_Handling**
+
+---
+
+```
+KEY POINTS:
+- try = risky code goes here
+- except = catches specific error, handles gracefully
+- finally = always runs — success or failure — use for cleanup
+- raise = trigger your own error on purpose
+- as e = captures error message so you can print/use it
+- most specific except first, generic Exception last
+- never use bare except: alone — swallows all errors silently
+- custom exception = class MyError(Exception): pass
+- ZeroDivisionError = dividing by zero
+- TypeError = wrong data type
+- ValueError = right type, wrong value
+- IndexError = list index doesn't exist
+- KeyError = dictionary key doesn't exist
+- Django view = try/except wraps database operations
+- return Response error = instead of crashing API
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+# BASIC try/except/finally
+def divide(a, b):
+    try:
+        result = a / b
+        print(f"Result: {result}")
+    except ZeroDivisionError:
+        print("Cannot divide by zero")
+    except TypeError:
+        print("Invalid input type")
+    finally:
+        print("Division attempt finished")  # always runs
+
+
+# raise — trigger own error
+def get_age(age):
+    try:
+        if age < 0:
+            raise ValueError("Age cannot be negative")
+        if age > 150:
+            raise ValueError("Age cannot exceed 150")
+        print(f"Age accepted: {age}")
+    except ValueError as e:
+        print(f"Error: {e}")
+
+
+# multiple except + generic
+def safe_operation(a, b):
+    try:
+        return a / b
+    except ZeroDivisionError:
+        print("Zero division"); return None
+    except TypeError:
+        print("Type error"); return None
+    except Exception as e:
+        print(f"Unexpected: {e}"); return None
+    finally:
+        print("Done")
+
+
+# custom exception
+class InvalidSalaryError(Exception):
+    pass
+
+class InvalidAgeError(Exception):
+    pass
+
+def create_employee(name, salary, age):
+    try:
+        if salary <= 0:
+            raise InvalidSalaryError("Salary must be positive")
+        if age < 18:
+            raise InvalidAgeError("Must be 18 or older")
+        print(f"{name} created successfully")
+    except InvalidSalaryError as e:
+        print(f"Salary Error: {e}")
+    except InvalidAgeError as e:
+        print(f"Age Error: {e}")
+
+
+divide(10, 2)
+divide(10, 0)
+get_age(-5)
+create_employee("Ravi", 30000, 25)
+create_employee("Sai", -5000, 25)
+```
+
+---
+
+```
+DJANGO CONNECTION:
+every view wraps database code in try/except
+KeyError = missing field in request
+ValueError = invalid value in request
+return Response({"error": msg}, status=400) = proper error response
+try/except = API never crashes on bad input
+```
+
+---
+
+Say "W2 D6" when ready.
