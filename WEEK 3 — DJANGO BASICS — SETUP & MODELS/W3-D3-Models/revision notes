@@ -1,0 +1,112 @@
+**W3-D3-Revision-Models**
+
+---
+
+```
+KEY POINTS:
+- model = database table defined as Python class
+- class Post(models.Model) = one database table
+- Django auto adds 'id' field to every model
+- CharField = short text, must have max_length
+- TextField = long text, no max_length needed
+- IntegerField = whole numbers
+- DecimalField = precise decimals (use for money)
+- BooleanField = True/False only
+- DateTimeField auto_now_add=True = set once on create, never changes
+- DateTimeField auto_now=True = updates every time object saved
+- null=True = database stores NULL (empty in DB)
+- blank=True = form validation allows empty
+- use both together for optional fields
+- unique=True = no duplicate values allowed
+- default= = value used when not provided
+- __str__ = controls how object shows in admin/shell
+- makemigrations = writes down changes to migration file
+- migrate = applies changes to actual database
+- always run both in order — every time models.py changes
+- Post.objects.create() = create + save in one step
+- p1.save() = save object to database
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+# blog/models.py
+from django.db import models
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    # short text — max 200 chars
+
+    content = models.TextField()
+    # long text — unlimited
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    # set once on create — never changes
+
+    updated_at = models.DateTimeField(auto_now=True)
+    # updates every time object saved
+
+    is_published = models.BooleanField(default=False)
+    # True/False — starts unpublished
+
+    views_count = models.IntegerField(default=0)
+    # whole number — starts at 0
+
+    author_name = models.CharField(max_length=100, default="Anonymous")
+    # optional with default
+
+    category = models.CharField(max_length=50, null=True, blank=True)
+    # optional — null in DB, blank in form
+
+    def __str__(self):
+        return self.title
+        # shows title in admin/shell instead of <Post object>
+
+
+# MIGRATIONS — run every time models.py changes
+# python manage.py makemigrations
+# python manage.py migrate
+
+# SHELL — test your model
+# python manage.py shell
+
+from blog.models import Post
+
+p1 = Post.objects.create(title="First Post", content="Hello Django")
+# create + save in one step
+
+p2 = Post(title="Second Post", content="Learning Models")
+p2.save()
+# create then save separately
+
+print(Post.objects.all())
+# all posts from database
+```
+
+---
+
+```
+FIELD TYPES QUICK REFERENCE:
+CharField(max_length=n) = short text
+TextField() = long text
+IntegerField() = whole number
+DecimalField(max_digits=10, decimal_places=2) = precise decimal
+FloatField() = floating point
+BooleanField(default=False) = True/False
+DateField() = date only
+DateTimeField() = date + time
+EmailField() = validates email format
+FileField(upload_to='folder/') = file upload
+ImageField(upload_to='folder/') = image upload
+
+DJANGO CONNECTION:
+Job model = same as Post with different fields
+JobApplication model = same pattern
+every project feature starts with a model
+```
+
+---
+
+Say "W3 D4" when ready.
