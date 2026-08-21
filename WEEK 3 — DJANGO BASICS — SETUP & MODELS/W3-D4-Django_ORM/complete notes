@@ -1,0 +1,356 @@
+**W3-D4-Django_ORM**
+
+---
+
+**What and Why:**
+ORM = Object Relational Mapper. Instead of writing raw SQL queries, you write Python to talk to your database. Django converts your Python into SQL automatically. This is how your entire AI Job Portal and SaaS Expense Manager will talk to the database — no raw SQL needed. Master this today — you'll use it every single day in both projects.
+
+---
+
+```python
+# ============================================================
+# CONCEPT 1: ORM BASICS — OPEN DJANGO SHELL
+# ============================================================
+
+# Open terminal, activate venv, run:
+# python manage.py shell
+
+# Import your model first — always:
+from blog.models import Post
+
+# ============================================================
+# CONCEPT 2: CREATE — ADD DATA TO DATABASE
+# ============================================================
+
+# WAY 1 — create() — creates AND saves in one step
+p1 = Post.objects.create(
+    title="My First Post",
+    content="Hello Django ORM",
+    is_published=True
+)
+# Post.objects = Django's manager — gateway to database operations
+# .create() = INSERT INTO blog_post (...) VALUES (...) in SQL
+# p1 = Post object with id=1, created_at set automatically
+print(p1.id)        # 1
+print(p1.title)     # My First Post
+print(p1.created_at) # 2024-01-15 10:30:00
+
+# WAY 2 — create object then save separately
+p2 = Post(title="Second Post", content="Learning ORM")
+# creates object in memory — NOT saved to database yet
+p2.is_published = True  # can set attributes before saving
+p2.save()
+# save() = now INSERT INTO database
+# use this when you need to set/modify attributes before saving
+
+# WAY 3 — get_or_create() — creates only if doesn't exist
+p3, created = Post.objects.get_or_create(
+    title="Third Post",
+    defaults={"content": "ORM is powerful"}
+)
+# created = True if new object created
+# created = False if existing object found
+# useful to avoid duplicate entries
+print(created)  # True first time, False if run again
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 3: READ — GET DATA FROM DATABASE
+# ============================================================
+
+from blog.models import Post
+
+# GET ALL RECORDS
+posts = Post.objects.all()
+# SELECT * FROM blog_post in SQL
+# returns QuerySet — like a list of Post objects
+print(posts)  # <QuerySet [<Post: My First Post>, ...]>
+
+for post in posts:
+    print(post.title, post.is_published)
+# loop through QuerySet like a normal list
+
+# GET FIRST AND LAST
+first_post = Post.objects.first()
+# returns first object ordered by id
+last_post = Post.objects.last()
+# returns last object ordered by id
+
+# GET ONE SPECIFIC RECORD — get()
+post = Post.objects.get(id=1)
+# SELECT * FROM blog_post WHERE id=1
+# returns SINGLE object — not a list
+# IMPORTANT: crashes with error if:
+# - no record found (DoesNotExist error)
+# - more than one record found (MultipleObjectsReturned error)
+# use only when you're 100% sure one record exists
+print(post.title)  # My First Post
+
+# SAFE WAY — filter() instead of get()
+posts = Post.objects.filter(id=1)
+# returns QuerySet — empty list if not found, never crashes
+# use filter() when not sure if record exists
+# use get() only for primary key lookups
+
+# COUNT RECORDS
+count = Post.objects.count()
+# SELECT COUNT(*) FROM blog_post
+print(count)  # total number of posts
+
+# CHECK IF EXISTS
+exists = Post.objects.filter(title="My First Post").exists()
+# returns True or False
+# faster than filter() when you only need to know if exists
+print(exists)  # True
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 4: FILTER — QUERY WITH CONDITIONS
+# ============================================================
+
+from blog.models import Post
+
+# BASIC FILTER
+published_posts = Post.objects.filter(is_published=True)
+# SELECT * FROM blog_post WHERE is_published=True
+# returns QuerySet of all published posts
+
+unpublished = Post.objects.filter(is_published=False)
+
+# FILTER WITH MULTIPLE CONDITIONS (AND)
+posts = Post.objects.filter(is_published=True, views_count=0)
+# WHERE is_published=True AND views_count=0
+
+# EXCLUDE — opposite of filter
+posts = Post.objects.exclude(is_published=True)
+# returns all posts WHERE is_published != True
+
+# FIELD LOOKUPS — powerful filtering options
+Post.objects.filter(title__exact="My First Post")
+# exact match — same as title="My First Post"
+
+Post.objects.filter(title__iexact="my first post")
+# case-insensitive exact match
+
+Post.objects.filter(title__contains="First")
+# title contains "First" — case sensitive
+# LIKE '%First%' in SQL
+
+Post.objects.filter(title__icontains="first")
+# case-insensitive contains
+
+Post.objects.filter(views_count__gt=10)
+# views_count > 10 (gt = greater than)
+
+Post.objects.filter(views_count__gte=10)
+# views_count >= 10 (gte = greater than or equal)
+
+Post.objects.filter(views_count__lt=100)
+# views_count < 100 (lt = less than)
+
+Post.objects.filter(views_count__lte=100)
+# views_count <= 100 (lte = less than or equal)
+
+Post.objects.filter(id__in=[1, 2, 3])
+# WHERE id IN (1, 2, 3)
+
+Post.objects.filter(title__startswith="My")
+# title starts with "My"
+
+Post.objects.filter(title__endswith="Post")
+# title ends with "Post"
+
+# ORDER BY
+Post.objects.all().order_by('created_at')
+# ascending order (oldest first)
+
+Post.objects.all().order_by('-created_at')
+# descending order — minus sign = reverse
+# newest first
+
+# LIMIT RESULTS
+Post.objects.all()[:5]
+# first 5 results — Python slice
+# SELECT * FROM blog_post LIMIT 5
+
+Post.objects.all()[5:10]
+# results 6 to 10 — offset + limit
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 5: UPDATE — CHANGE DATA IN DATABASE
+# ============================================================
+
+from blog.models import Post
+
+# WAY 1 — update single object
+post = Post.objects.get(id=1)
+post.title = "Updated Title"
+post.is_published = True
+post.save()
+# save() = UPDATE blog_post SET title=... WHERE id=1
+# must call save() after changing attributes
+# without save() — changes stay in memory only, never in database
+
+# WAY 2 — update() — bulk update without fetching objects
+Post.objects.filter(is_published=False).update(views_count=0)
+# UPDATE blog_post SET views_count=0 WHERE is_published=False
+# updates ALL matching records in one SQL query
+# faster than looping and saving each object individually
+# use for bulk updates
+
+Post.objects.filter(id=1).update(title="New Title")
+# update specific record
+
+# WAY 3 — update_or_create()
+post, created = Post.objects.update_or_create(
+    title="Specific Post",
+    defaults={"content": "Updated content", "is_published": True}
+)
+# if post with title exists — update it with defaults
+# if not exists — create it with title + defaults
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 6: DELETE — REMOVE DATA FROM DATABASE
+# ============================================================
+
+from blog.models import Post
+
+# WAY 1 — delete single object
+post = Post.objects.get(id=1)
+post.delete()
+# DELETE FROM blog_post WHERE id=1
+# object is gone from database — id=1 never reused
+
+# WAY 2 — bulk delete
+Post.objects.filter(is_published=False).delete()
+# DELETE FROM blog_post WHERE is_published=False
+# deletes ALL unpublished posts in one query
+
+Post.objects.all().delete()
+# DELETE FROM blog_post
+# deletes EVERYTHING — be careful with this
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 7: CHAINING QUERYSETS
+# ============================================================
+
+from blog.models import Post
+
+# QuerySets are LAZY — no database hit until you evaluate
+query = Post.objects.filter(is_published=True)
+# NO database query yet — just builds the query
+
+query = query.filter(views_count__gt=10)
+# still no database query — adds condition
+
+query = query.order_by('-created_at')
+# still no database query — adds ordering
+
+results = list(query)
+# NOW database query runs — evaluates QuerySet
+# SELECT * FROM blog_post WHERE is_published=True
+# AND views_count>10 ORDER BY created_at DESC
+
+# CHAINING IN ONE LINE:
+results = Post.objects.filter(
+    is_published=True
+).filter(
+    views_count__gt=10
+).order_by('-created_at')[:5]
+# filter → filter → order → limit — all in one chain
+# only ONE database query runs at the end
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — AI JOB PORTAL ORM USAGE
+# ============================================================
+
+# In your AI Job Portal views (Week 7), you will write:
+
+# Get all active jobs
+jobs = Job.objects.filter(is_active=True).order_by('-created_at')
+
+# Search jobs by title
+jobs = Job.objects.filter(title__icontains=search_query)
+
+# Get specific job
+job = Job.objects.get(id=job_id)
+
+# Create new application
+application = JobApplication.objects.create(
+    job=job,
+    candidate=request.user,
+    status="pending"
+)
+
+# Check duplicate application
+already_applied = JobApplication.objects.filter(
+    job=job,
+    candidate=request.user
+).exists()
+# if already_applied: return error
+
+# Update application status
+JobApplication.objects.filter(id=app_id).update(status="shortlisted")
+
+# Delete job
+job = Job.objects.get(id=job_id)
+job.delete()
+
+# Every single line above = ORM you learned today
+# same methods, different model names
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Open Django shell and do all of these using your Post model:
+- Create 5 posts with different titles, content, is_published values
+- Get all published posts
+- Get posts with title containing "Django"
+- Get first 3 posts ordered by newest first
+- Count total posts
+- Check if post with title "My First Post" exists
+Paste your shell commands and outputs here.
+
+**Q2:** Using Django shell:
+- Update all unpublished posts to set is_published=True
+- Update specific post (id=1) title to "Updated Title"
+- Delete all posts where views_count = 0
+- Verify deletions with Post.objects.all()
+Paste commands and outputs.
+
+**Q3:** Answer without looking at notes:
+- What is the difference between `get()` and `filter()`?
+- What does `__icontains` do?
+- What is a QuerySet?
+- Why are QuerySets lazy?
+- What is the difference between `filter().update()` and get then save?
+
+---
+
+Say "Revision Notes W3 D4" for revision or "W3 D5" to continue.
