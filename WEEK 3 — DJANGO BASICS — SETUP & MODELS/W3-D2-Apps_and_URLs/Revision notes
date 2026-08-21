@@ -1,0 +1,92 @@
+**W3-D2-Revision-Apps_and_URLs**
+
+---
+
+```
+KEY POINTS:
+- app = one feature of your project (users, jobs, applications)
+- python manage.py startapp blog = creates blog app
+- always register app in INSTALLED_APPS in settings.py
+- view = function that handles request and returns response
+- every view takes 'request' as first parameter — always
+- every view must return a response — HttpResponse minimum
+- blog/urls.py = create this file yourself — doesn't exist by default
+- path('hello/', views.hello_view) = connects URL to view
+- NO () after hello_view — passing function, not calling it
+- include('blog.urls') = forward blog/ URLs to blog app
+- <str:name> = URL parameter — captures value from URL
+- 404 = URL not connected — check urls.py
+- 500 = error in view code — check views.py
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+# blog/views.py
+from django.http import HttpResponse
+
+def hello_view(request):
+    return HttpResponse("Hello World")
+
+def about_view(request):
+    return HttpResponse("This is the about page")
+
+def greet_view(request, name):
+    return HttpResponse(f"Hello {name}!")
+
+
+# blog/urls.py (create this file yourself)
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('hello/', views.hello_view),
+    path('about/', views.about_view),
+    path('greet/<str:name>/', views.greet_view),
+]
+
+
+# myproject/urls.py (main urls file)
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('blog/', include('blog.urls')),
+    # blog/ prefix → forwards to blog/urls.py
+]
+
+
+# settings.py
+INSTALLED_APPS = [
+    ...
+    'blog',   # register your app here
+]
+```
+
+---
+
+```
+REQUEST FLOW:
+/blog/hello/
+→ myproject/urls.py sees 'blog/' → include('blog.urls')
+→ blog/urls.py sees 'hello/' → hello_view(request)
+→ hello_view returns HttpResponse("Hello World")
+→ browser shows "Hello World"
+
+TEST URLS:
+http://127.0.0.1:8000/blog/hello/
+http://127.0.0.1:8000/blog/about/
+http://127.0.0.1:8000/blog/greet/Ravi/
+
+DJANGO CONNECTION:
+hello_view → JobListView (Week 4)
+HttpResponse → Response JSON (Week 4)
+function view → class-based view (Week 4)
+```
+
+---
+
+Say "W3 D3" when ready.
