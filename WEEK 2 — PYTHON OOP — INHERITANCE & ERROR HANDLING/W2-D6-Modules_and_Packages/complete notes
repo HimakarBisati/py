@@ -1,0 +1,258 @@
+**W2-D6-Modules_and_Packages**
+
+---
+
+**What and Why:**
+Real projects are never one giant file. Django itself is split into many files — `models.py`, `views.py`, `urls.py`, `serializers.py`. Every Django app you create follows this structure. Today you learn how to split code into separate files and import them — this is exactly what Django does automatically when you create an app. Understanding this makes Django's file structure completely clear instead of confusing.
+
+---
+
+```python
+# ============================================================
+# CONCEPT 1: MODULE — ONE FILE IMPORTING FROM ANOTHER
+# ============================================================
+
+# Create TWO files in same folder:
+
+# FILE 1: shapes.py
+class Circle:
+    def __init__(self, radius):
+        self.radius = radius
+
+    def area(self):
+        return 3.14 * self.radius * self.radius
+
+class Square:
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        return self.side * self.side
+
+def greet():
+    print("Hello from shapes module")
+
+PI = 3.14159
+# PI = module-level variable — accessible after importing
+
+
+# FILE 2: main.py (import from shapes.py)
+
+# WAY 1 — import specific things
+from shapes import Circle, greet
+# only Circle and greet imported — Square and PI not available
+c1 = Circle(5)
+print(c1.area())  # 78.5
+greet()           # Hello from shapes module
+
+# WAY 2 — import entire module
+import shapes
+# access everything using shapes.ClassName
+c2 = shapes.Circle(3)
+s1 = shapes.Square(4)
+print(c2.area())   # 28.26
+print(s1.area())   # 16
+print(shapes.PI)   # 3.14159
+
+# WAY 3 — import with alias (rename on import)
+import shapes as sh
+# sh is now the alias for shapes module
+c3 = sh.Circle(7)
+print(c3.area())   # 153.86
+
+# WAY 4 — import everything (NOT recommended)
+from shapes import *
+# imports ALL public names from shapes
+# bad practice — pollutes namespace, hard to track where things come from
+# only use when you know exactly what you're importing
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 2: PACKAGE — FOLDER OF MODULES
+# ============================================================
+
+# Create this folder structure:
+#
+# myproject/
+# │
+# ├── main.py
+# │
+# └── utils/              ← PACKAGE (folder)
+#     ├── __init__.py     ← makes this folder a package (can be empty)
+#     ├── helpers.py      ← module inside package
+#     └── validators.py   ← another module inside package
+
+
+# utils/helpers.py
+def square(n):
+    return n * n
+
+def cube(n):
+    return n * n * n
+
+def add(a, b):
+    return a + b
+
+
+# utils/validators.py
+def is_valid_email(email):
+    return "@" in email and "." in email
+
+def is_valid_age(age):
+    return 0 < age < 150
+
+def is_valid_salary(salary):
+    return salary > 0
+
+
+# main.py — importing from package
+from utils.helpers import square, cube
+# utils = package folder name
+# helpers = module (file) inside that package
+# square, cube = specific functions to import
+
+print(square(5))   # 25
+print(cube(3))     # 27
+
+from utils.validators import is_valid_email, is_valid_salary
+
+print(is_valid_email("ravi@gmail.com"))  # True
+print(is_valid_email("ravimail.com"))    # False
+print(is_valid_salary(-100))             # False
+
+
+# utils/__init__.py — can also define what's available from package
+# leave empty for now — that's fine for basic packages
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 3: if __name__ == "__main__" — IMPORTANT PATTERN
+# ============================================================
+
+# shapes.py
+
+class Circle:
+    def __init__(self, radius):
+        self.radius = radius
+
+    def area(self):
+        return 3.14 * self.radius * self.radius
+
+def greet():
+    print("Hello from shapes")
+
+# THIS CODE RUNS ONLY WHEN shapes.py IS RUN DIRECTLY
+# when imported from another file — this block is SKIPPED
+if __name__ == "__main__":
+    c = Circle(5)
+    print(c.area())   # only runs when you run shapes.py directly
+    greet()           # not when main.py imports shapes
+
+# __name__ = "__main__" when file is run directly
+# __name__ = "shapes" when file is imported
+# this pattern prevents test/demo code from running on import
+# you'll see this in every Python file in real projects
+```
+
+---
+
+```python
+# ============================================================
+# CONCEPT 4: INSTALLING EXTERNAL PACKAGES WITH pip
+# ============================================================
+
+# pip = Python's package manager
+# installs packages from internet (PyPI — Python Package Index)
+
+# IN TERMINAL (inside your venv):
+# pip install requests
+# pip install django
+# pip install djangorestframework
+
+# After installing requests:
+import requests
+
+response = requests.get("https://api.github.com")
+# sends HTTP GET request to GitHub API
+# response = server's reply
+
+print(response.status_code)
+# 200 = success
+# 404 = not found
+# 500 = server error
+
+print(response.json())
+# .json() = converts response body to Python dictionary
+# same as what your Django API will return to clients later
+
+# pip freeze — shows all installed packages with versions
+# pip freeze > requirements.txt — saves list to file
+# pip install -r requirements.txt — installs all from file
+# requirements.txt used so others can recreate your exact environment
+```
+
+---
+
+```python
+# ============================================================
+# DJANGO CONNECTION — HOW THIS LOOKS IN REAL PROJECT
+# ============================================================
+
+# Django app structure = package with modules:
+
+# blog/                    ← Django app = package
+# ├── __init__.py          ← makes it a package
+# ├── models.py            ← module (your database tables)
+# ├── views.py             ← module (your API logic)
+# ├── urls.py              ← module (your URL routing)
+# ├── serializers.py       ← module (converts data to JSON)
+# └── admin.py             ← module (admin panel config)
+
+# In views.py — importing from other modules:
+from .models import Post
+# . = current package (blog app)
+# models = models.py file
+# Post = class inside models.py
+
+from .serializers import PostSerializer
+# same pattern — import from serializers.py
+
+from django.contrib.auth.models import User
+# importing from Django's own package
+# django = package, contrib.auth.models = nested module path
+# User = class inside that module
+
+# Everything in Django = modules and packages
+# What you learned today IS how Django is structured
+```
+
+---
+
+**PRACTICE QUESTIONS**
+
+Write yourself, paste here, I check and correct:
+
+**Q1:** Create two files `bank.py` and `main.py`:
+- `bank.py` — contains `BankAccount` class (from W1 D2) and a function `create_account(owner, balance)` that creates and returns a BankAccount object
+- `main.py` — imports `BankAccount` and `create_account` from `bank.py`, creates 2 accounts, tests deposit/withdraw/transfer
+Use `if __name__ == "__main__":` in `bank.py` for any test code.
+
+**Q2:** Create a package called `utils` with two modules:
+- `utils/validators.py` — functions: `is_valid_email(email)`, `is_valid_password(password)` (min 8 chars), `is_valid_phone(phone)` (10 digits)
+- `utils/helpers.py` — functions: `format_currency(amount)` returns `f"₹{amount:,}"`, `get_initials(name)` returns first letter of each word
+- `main.py` — imports all functions from both modules, tests each one
+
+**Q3:** Install `requests` package using pip, then write a script that:
+- Calls `https://jsonplaceholder.typicode.com/users` (free test API)
+- Prints the name and email of first 3 users from the response
+- Wraps in try/except to handle network errors
+
+---
+
+Say "Revision Notes W2 D6" for revision or "W2 D7" to continue.
