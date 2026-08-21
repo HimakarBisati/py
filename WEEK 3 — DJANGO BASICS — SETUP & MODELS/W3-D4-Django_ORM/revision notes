@@ -1,0 +1,104 @@
+**W3-D4-Revision-Django_ORM**
+
+---
+
+```
+KEY POINTS:
+- ORM = write Python instead of raw SQL to talk to database
+- Post.objects = Django's manager — gateway to all DB operations
+- create() = creates AND saves in one step
+- save() = saves object to database (must call after changing attributes)
+- all() = get all records — returns QuerySet
+- get() = get ONE record — crashes if not found or multiple found
+- filter() = get matching records — returns empty QuerySet if not found
+- exclude() = opposite of filter
+- exists() = returns True/False — faster than filter() for checking
+- count() = returns total number of records
+- order_by('field') = ascending, order_by('-field') = descending
+- [:5] = limit results (Python slice)
+- filter().update() = bulk update without fetching objects
+- delete() = remove from database permanently
+- QuerySets are LAZY = no DB query until evaluated
+- chaining = filter().filter().order_by()[:5] = one DB query
+
+FIELD LOOKUPS:
+__exact = exact match
+__iexact = case-insensitive exact
+__contains = contains (case-sensitive)
+__icontains = contains (case-insensitive)
+__gt = greater than
+__gte = greater than or equal
+__lt = less than
+__lte = less than or equal
+__in = in list
+__startswith = starts with
+__endswith = ends with
+```
+
+---
+
+```python
+# QUICK REFERENCE CODE
+
+from blog.models import Post
+
+# CREATE
+p1 = Post.objects.create(title="First", content="Hello", is_published=True)
+p2 = Post(title="Second", content="World")
+p2.save()
+
+# READ
+Post.objects.all()                              # all records
+Post.objects.get(id=1)                          # one record — crashes if not found
+Post.objects.filter(is_published=True)          # matching records — safe
+Post.objects.first()                            # first record
+Post.objects.last()                             # last record
+Post.objects.count()                            # total count
+Post.objects.filter(title="x").exists()         # True/False
+
+# FILTER WITH LOOKUPS
+Post.objects.filter(title__icontains="django")  # case-insensitive contains
+Post.objects.filter(views_count__gt=10)         # greater than
+Post.objects.filter(id__in=[1, 2, 3])          # in list
+Post.objects.exclude(is_published=True)         # opposite of filter
+
+# ORDER AND LIMIT
+Post.objects.all().order_by('-created_at')      # newest first
+Post.objects.all().order_by('created_at')       # oldest first
+Post.objects.all()[:5]                          # first 5 results
+
+# UPDATE
+post = Post.objects.get(id=1)
+post.title = "New Title"
+post.save()                                     # save after changing
+
+Post.objects.filter(is_published=False).update(views_count=0)  # bulk update
+
+# DELETE
+post = Post.objects.get(id=1)
+post.delete()                                   # single delete
+
+Post.objects.filter(is_published=False).delete()  # bulk delete
+
+# CHAIN QUERYSETS
+Post.objects.filter(
+    is_published=True
+).filter(
+    views_count__gt=10
+).order_by('-created_at')[:5]
+```
+
+---
+
+```
+DJANGO CONNECTION — AI JOB PORTAL:
+Job.objects.filter(is_active=True) = get active jobs
+Job.objects.filter(title__icontains=query) = search jobs
+JobApplication.objects.filter(job=job, candidate=user).exists() = check duplicate
+JobApplication.objects.create(...) = submit application
+JobApplication.objects.filter(id=id).update(status="shortlisted") = update status
+```
+
+---
+
+Say "W3 D5" when ready.
